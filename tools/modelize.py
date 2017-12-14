@@ -81,6 +81,10 @@ class Modelize(object):
                 self.__extract_tables__(os.path.join(root, d))
 
 
+    def list_table(self):
+        return self.tables().keys()
+
+
     def tables(self):
         return self.__tables__
 
