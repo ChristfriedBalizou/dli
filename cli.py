@@ -19,12 +19,12 @@ def modelize(**kwargs):
     return Modelize(**kwargs)
 
 
-def draw(filename, docs=[], relations=[], layout='dot'):
+def draw(filename, layout, **kwargs):
     '''
     Use pygraph to draw class diagram
     '''
 
-    dot = Dotit(docs=docs, relations=relations)
+    dot = Dotit(**kwargs)
 
     libdG = graph.AGraph(dot.render())
     libdG.layout(prog=layout)
@@ -103,6 +103,7 @@ if __name__ == "__main__":
         print model.statistics()
         sys.exit(0)
 
+    # FIXME this will crash
     print  draw(docs=model.dot(),
                 relations=model.dot_relations(),
                 filename=options.directory,

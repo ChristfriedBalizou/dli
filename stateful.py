@@ -67,8 +67,15 @@ def run_parrallel(args):
             docs = model.dot()
             relations = model.dot_relations()
             draw(file_path,
+                 'dot',
                  docs=docs,
-                 relations=relations)
+                 relations=relations,
+                 decoration=req.get("decoration"),
+                 show_columns=req.get("show_columns"),
+                 color="white",
+                 text_color="#222222",
+                 bgcolor="#EEEEEE",
+                 table_bgcolor="#3F51B5")
 
             response = [extension(filename, 'png')]
         except Exception as e:

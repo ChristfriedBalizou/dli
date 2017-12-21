@@ -16,9 +16,13 @@ class Dotit(object):
             splines=True,
             style="rounded",
             color="olivedrab4",
+            text_color="#7B7B7B",
             bgcolor="palegoldenrod",
+            table_bgcolor="olivedrab4",
             shape="plaintext",
+            decoration=True,
             docs=None,
+            show_columns=True,
             relations=None):
 
         # Formating
@@ -27,12 +31,16 @@ class Dotit(object):
         self.splines = splines
         self.shape = shape
         self.color = color
+        self.text_color = text_color
         self.bgcolor = bgcolor
+        self.table_bgcolor = table_bgcolor
         self.style = style
+        self.decoration = decoration
 
         #Data
         self.docs = docs
         self.relations = relations
+        self.show_columns = show_columns
 
 
 
@@ -69,7 +77,10 @@ class Dotit(object):
 
             for tab in sub.get("tables"):
 
-                rows = [self.rows(f) for f in tab.get("fields")]
+                rows = []
+
+                if self.show_columns is True:
+                    rows = [self.rows(f) for f in tab.get("fields")]
 
                 name = tab.get("name").replace('#', "TEMP").replace('.', '_')
 
@@ -128,6 +139,9 @@ class Dotit(object):
 
     def subgraph(self, name, graph_label, content):
 
+        if self.decoration is not True:
+            graph_label = ""
+
         return '''
             subgraph cluster_%s {
                 label=<
@@ -157,7 +171,7 @@ class Dotit(object):
         return '''
             %s [label=<
               <TABLE BGCOLOR="%s" BORDER="0" CELLBORDER="0" CELLSPACING="0">
-              <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="olivedrab4">
+              <TR><TD COLSPAN="2" CELLPADDING="4" ALIGN="CENTER" BGCOLOR="%s">
               <FONT FACE="%s Bold" COLOR="white">
                 %s
               </FONT>
@@ -167,19 +181,19 @@ class Dotit(object):
 
                 </TABLE>
             >]
-        ''' % (name, self.bgcolor, self.fontname, name, rows)
+        ''' % (name, self.bgcolor, self.table_bgcolor, self.fontname, name, rows)
 
 
     def rows(self, col):
         return '''
               <TR>
                   <TD ALIGN="LEFT" BORDER="0">
-                  <FONT COLOR="#7B7B7B" FACE="Helvetica ">%s</FONT>
+                  <FONT COLOR="%s" FACE="Helvetica ">%s</FONT>
                   </TD>
                   <TD ALIGN="LEFT" BORDER="0">
                   </TD>
               </TR>
-        ''' % (col)
+        ''' % (self.text_color, col)
 
 
     def relation(self, a, b, fields=[]):
