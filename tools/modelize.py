@@ -82,7 +82,7 @@ class Modelize(object):
 
 
     def list_table(self):
-        return self.tables().keys()
+        return sorted(self.tables().keys())
 
 
     def tables(self):
