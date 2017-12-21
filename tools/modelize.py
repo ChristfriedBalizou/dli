@@ -68,6 +68,28 @@ class Modelize(object):
         return results
 
 
+    def statistics(self):
+
+        self.__process__()
+        docs = {"tables_number": len(self.__tables__),
+                "columns_number": len(self.__fields__)}
+
+        if len(self.table_list) == 0:
+            return docs
+
+
+        docs["tables_number"] = len(self.table_list)
+        docs["columns_number"] = 0
+
+        for _, tabs in self.__fields__.items():
+            for t in self.table_list:
+                if not t in tabs:
+                    continue
+                docs["columns_number"] = docs["columns_number"] + 1
+
+        return docs
+
+
     def __extract_tables__(self, directory):
         for root, dirs, files in os.walk(directory):
             for f in files:

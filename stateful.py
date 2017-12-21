@@ -41,22 +41,19 @@ def run_parrallel(args):
 
     logging.info("execute request: {}".format(filename))
 
+    response = None
+    message = None
+
     if req.get("action") == "listTables":
 
         try:
             model = modelize(directory=DATABASE_DIR)
-
-            new_filename = extension(filename, 'res')
-            file_path = os.path.join(directory, new_filename)
-
-            with open(file_path, "wb") as writer:
-                json.dump(model.list_table(), writer)
+            response = model.list_table()
         except Exception as e:
+            message = str(e)
             logging.error(e)
 
-
-
-    if req.get("action") == "tables":
+    elif req.get("action") == "tables":
 
         try:
             model = modelize(directory=DATABASE_DIR,
@@ -73,12 +70,32 @@ def run_parrallel(args):
                  docs=docs,
                  relations=relations)
 
-            file_path = os.path.join(directory, extension(filename, 'res'))
-            with open(file_path, "wb") as writer:
-                json.dump([extension(filename, 'res')], writer)
+            response = [extension(filename, 'png')]
         except Exception as e:
+            message = str(e)
             logging.error(e)
 
+    elif req.get("action") == "statistics":
+
+        try:
+            model = modelize(directory=DATABASE_DIR,
+                             relation_criterion="^REC",
+                             draw_relations=True,
+                             table_list=req.get("tables"))
+            response = model.statistics()
+        except Exception as e:
+            message = str(e)
+            logging.error(e)
+
+    elif req.get("action") is None:
+        message = "No action to execute found"
+    else:
+        message = "Requested action {} not found".format(req.get("action"))
+
+    file_path = os.path.join(directory, extension(filename, 'res'))
+
+    with open(file_path, "wb") as writer:
+        json.dump({"response" : response, "message": message}, writer)
 
     os.remove(os.path.join(directory, filename))
     logging.info("Done")

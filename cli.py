@@ -61,6 +61,11 @@ if __name__ == "__main__":
                         action='store_true',
                         help='Print all tables in database scheme')
 
+    parser.add_argument('--statistics',
+                        default=False,
+                        action='store_true',
+                        help='Print statistics on given or all tables')
+
     parser.add_argument('-t', '--table-list',
                         default=[],
                         nargs='*',
@@ -87,11 +92,16 @@ if __name__ == "__main__":
         sys.exit(1)
 
     model = modelize(table_list=options.table_list,
+                    directory=options.directory,
                      draw_relations=options.relations,
                      relation_criterion=options.pattern)
 
     if options.print_tables:
         print model.tables()
+
+    if options.statistics:
+        print model.statistics()
+        sys.exit(0)
 
     print  draw(docs=model.dot(),
                 relations=model.dot_relations(),
