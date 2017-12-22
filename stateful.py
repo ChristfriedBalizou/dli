@@ -77,7 +77,8 @@ def run_parrallel(args):
                  bgcolor="#EEEEEE",
                  table_bgcolor="#3F51B5")
 
-            response = [extension(filename, 'png')]
+            response = {"filename": extension(filename, 'png'),
+                        "relations": list(relations)}
         except Exception as e:
             message = str(e)
             logging.error(e)
