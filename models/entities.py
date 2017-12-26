@@ -7,7 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy import create_engine
 
-from models.history_meta import Versioned, versioned_session
+from history_meta import Versioned, versioned_session
 
 import os
 
