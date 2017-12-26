@@ -2,7 +2,7 @@
   All database model
 '''
 
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, DateTime, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy import create_engine
@@ -30,39 +30,41 @@ def DBsession():
     return Session()
 
 
-class TableClass(Versioned, BASE):
+class TableModel(Versioned, BASE):
 
-    __tablename__ = 'tableclass'
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    columns = relationship('ColumnClass',
-                           secondary='columnclass_tableclass_link')
-
-    def __eq__(self, other):
-        assert type(other) is TableClass and other.id == self.id
-
-
-class ColumnClass(Versioned, BASE):
-
-    __tablename__ = 'columnclass'
+    __tablename__ = 'tablemodel'
 
     id = Column(Integer, primary_key=True)
     name = Column(String)
-    tables = relationship(TableClass,
-                          secondary='columnclass_tableclass_link')
+    record_date = Column(DateTime, default=func.now())
 
     def __eq__(self, other):
-        assert type(other) is ColumnClass and other.id == self.id
+        assert type(other) is TableModel and other.id == self.id
 
 
-class ColumnClassTableClassLink(Versioned, BASE):
+class ColumnModel(Versioned, BASE):
 
-    __tablename__ = 'columnclass_tableclass_link'
+    __tablename__ = 'columnmodel'
 
-    tableclass_id = Column(Integer,
-                           ForeignKey('tableclass.id'),
-                           primary_key=True)
-    columnclass_id = Column(Integer,
-                            ForeignKey('columnclass.id'),
-                            primary_key=True)
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    is_deleted = Column(Boolean, default=False)
+    record_date = Column(DateTime, default=func.now())
+
+    def __eq__(self, other):
+        assert type(other) is ColumnModel and other.id == self.id
+
+
+class RelationModel(Versioned, BASE):
+
+    __tablename__ = 'relationmodel'
+
+    id = Column(Integer, primary_key=True)
+    record_date = Column(DateTime, default=func.now())
+    column_id = Column(Integer, ForeignKey("columnmodel.id"))
+    column = relationship(ColumnModel)
+    table_id = Column(Integer, ForeignKey("tablemodel.id"))
+    table = relationship(TableModel)
+
+    def __eq__(self, other):
+        assert type(other) is RelationModel and other.id == self.id
