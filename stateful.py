@@ -1,7 +1,7 @@
 '''
  A statefull version of libD
 '''
-
+from models.entities import TableModel, ColumnModel, RelationModel, DBsession
 from cli import modelize, draw
 
 from multiprocessing import Pool
@@ -72,6 +72,9 @@ def run_parrallel(args):
                  relations=relations,
                  decoration=req.get("decoration"),
                  show_columns=req.get("show_columns"),
+                 hdel_color="#BDBDBD",
+                 h_color="#009688",
+                 ai_color="#2196F3",
                  color="white",
                  text_color="#222222",
                  bgcolor="#EEEEEE",
@@ -91,6 +94,14 @@ def run_parrallel(args):
                              draw_relations=True,
                              table_list=req.get("tables"))
             response = model.statistics()
+        except Exception as e:
+            message = str(e)
+            logging.error(e)
+
+    elif req.get("action") == "relation":
+
+        try:
+            response = json.dumps(req, indent=4)
         except Exception as e:
             message = str(e)
             logging.error(e)
