@@ -1,8 +1,7 @@
 '''
  A statefull version of libD
 '''
-from models.entities import TableModel, ColumnModel, RelationModel, DBsession
-from cli import modelize, draw
+from defs import func
 
 from multiprocessing import Pool
 from watchdog.observers import Observer
@@ -43,73 +42,12 @@ def run_parrallel(args):
 
     response = None
     message = None
+    action = req.get("action")
 
-    if req.get("action") == "listTables":
-
-        try:
-            model = modelize(directory=DATABASE_DIR)
-            response = model.list_table()
-        except Exception as e:
-            message = str(e)
-            logging.error(e)
-
-    elif req.get("action") == "tables":
-
-        try:
-            model = modelize(directory=DATABASE_DIR,
-                             relation_criterion="^REC",
-                             draw_relations=True,
-                             table_list=req.get("tables"))
-
-            new_filename = extension(filename, 'png')
-            file_path = os.path.join(directory, new_filename)
-
-            docs = model.dot()
-            relations = model.dot_relations()
-            draw(file_path,
-                 'dot',
-                 docs=docs,
-                 relations=relations,
-                 decoration=req.get("decoration"),
-                 show_columns=req.get("show_columns"),
-                 hdel_color="#BDBDBD",
-                 h_color="#009688",
-                 ai_color="#2196F3",
-                 color="white",
-                 text_color="#222222",
-                 bgcolor="#EEEEEE",
-                 table_bgcolor="#3F51B5")
-
-            response = {"filename": extension(filename, 'png'),
-                        "relations": list(relations)}
-        except Exception as e:
-            message = str(e)
-            logging.error(e)
-
-    elif req.get("action") == "statistics":
-
-        try:
-            model = modelize(directory=DATABASE_DIR,
-                             relation_criterion="^REC",
-                             draw_relations=True,
-                             table_list=req.get("tables"))
-            response = model.statistics()
-        except Exception as e:
-            message = str(e)
-            logging.error(e)
-
-    elif req.get("action") == "relation":
-
-        try:
-            response = json.dumps(req, indent=4)
-        except Exception as e:
-            message = str(e)
-            logging.error(e)
-
-    elif req.get("action") is None:
-        message = "No action to execute found"
+    if not action in func:
+        message = "Requested action {} not found".format(action)
     else:
-        message = "Requested action {} not found".format(req.get("action"))
+       response, message = func[action](DATABASE_DIR, *args)
 
     file_path = os.path.join(directory, extension(filename, 'res'))
 

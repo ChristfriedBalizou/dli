@@ -211,36 +211,25 @@ class Dotit(object):
         docs=""
 
         for f in fields:
-            if f.get("relation_type") is None:
-                docs = '''
-                    %s
-                    %s -> %s
-                    [label="%s"] [arrowhead=none, arrowtail=none, dir=both]
-                ''' % (docs, a, b, self.fields_to_label(f))
+
+            color = "#000000"
+            style = "filled"
 
             if f.get("relation_type") == "human":
                 color = self.h_color
-                if f.get("is_deleted") is True:
-                    color = self.hdel_color
 
-                docs = '''
-                      %s
-                      subgraph %s_%s {
-                          %s
-                          %s -> %s
-                          [label="%s"] [arrowhead=none, arrowtail=none, dir=both]
-                      }
-                ''' % (docs, a, b, self.edge(color=color), a, b, self.fields_to_label(f))
+            if f.get("is_deleted") is True:
+                color = self.hdel_color
+                style = "dotted"
 
             if f.get("relation_type") == "ai":
-                docs = '''
-                      %s
-                      subgraph %s_%s {
-                          %s
-                          %s -> %s
-                          [label="%s"] [arrowhead=none, arrowtail=none, dir=both]
-                      }
-                ''' % (docs, a, b, self.edge(color=self.ai_color), a, b, self.fields_to_label(f))
+                color = self.ai_color
+
+            docs = '''
+                %s
+                %s -> %s [color="%s", fontcolor="%s", style=%s]
+                [label="%s"] [arrowhead=none, arrowtail=none, dir=both]
+            ''' % (docs, a, b, color, color, style, self.fields_to_label(f))
 
         return docs
 
@@ -252,8 +241,8 @@ class Dotit(object):
         fields_str = left
 
         if right == left:
-            fields_str = "%s, %s" % (fields_str, left)
+            fields_str = "%s" % (fields_str)
         else:
-            fields_str = "%s, %s - %s" % (fields_str, left, right)
+            fields_str = "%s - %s" % (left, right)
 
         return fields_str
