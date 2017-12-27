@@ -51,7 +51,14 @@ class Modelize(object):
 
         for k, v in self.__relations_pair__.items():
             a, b = k
-            self.relations.append({"a": a, "b": b, "fields": list(v)})
+            fields = [{"left": x,
+                       "right": x,
+                       "is_deleted": False,
+                       "relation_type": None} for x in v]
+
+            self.relations.append({"a": a,
+                                   "b": b,
+                                   "fields": fields})
 
         return self.relations
 
