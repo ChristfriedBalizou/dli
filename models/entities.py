@@ -68,3 +68,6 @@ class RelationModel(Versioned, BASE):
 
     def __eq__(self, other):
         assert type(other) is RelationModel and other.id == self.id
+
+# Create sqllite file
+BASE.metadata.create_all(bind=ENGINE)
