@@ -19,6 +19,9 @@ class Dotit(object):
             text_color="#7B7B7B",
             bgcolor="palegoldenrod",
             table_bgcolor="olivedrab4",
+            h_color="#000000",
+            hdel_color="#000000",
+            ai_color="#000000",
             shape="plaintext",
             decoration=True,
             docs=None,
@@ -33,6 +36,9 @@ class Dotit(object):
         self.color = color
         self.text_color = text_color
         self.bgcolor = bgcolor
+        self.h_color = h_color
+        self.hdel_color = hdel_color
+        self.ai_color = ai_color
         self.table_bgcolor = table_bgcolor
         self.style = style
         self.decoration = decoration
@@ -107,7 +113,9 @@ class Dotit(object):
                 %s
 
                 %s
-            ''' % (result, self.relation(relation.get("a"), relation.get("b"), relation.get("fields")))
+            ''' % (result, self.relation(relation.get("a"),
+                                         relation.get("b"),
+                                         fields=relation.get("fields")))
 
         result = '''
             %s
@@ -128,13 +136,15 @@ class Dotit(object):
         ''' % (self.fontname, self.fontsize, self.shape)
 
 
-    def edge(self):
+    def edge(self, color="#000000"):
         return '''
             edge [
                 fontname = "%s"
                 fontsize = %s
+                color = "%s"
+                fontcolor = "%s"
             ]
-        ''' % (self.fontname, self.fontsize)
+        ''' % (self.fontname, self.fontsize, color, color)
 
 
     def subgraph(self, name, graph_label, content):
@@ -197,7 +207,53 @@ class Dotit(object):
 
 
     def relation(self, a, b, fields=[]):
-        return '''
-            %s -> %s
-            [label="%s (%s)"] [arrowhead=none, arrowtail=none, dir=both]
-        ''' % (a, b, ', '.join(fields), a)
+
+        docs=""
+
+        for f in fields:
+            if f.get("relation_type") is None:
+                docs = '''
+                    %s
+                    %s -> %s
+                    [label="%s"] [arrowhead=none, arrowtail=none, dir=both]
+                ''' % (docs, a, b, self.fields_to_label(f))
+
+            if f.get("relation_type") == "human":
+                color = self.h_color
+                if f.get("is_deleted") is True:
+                    color = self.hdel_color
+
+                docs = '''
+                      %s
+                      subgraph %s_%s {
+                          %s
+                          %s -> %s
+                          [label="%s"] [arrowhead=none, arrowtail=none, dir=both]
+                      }
+                ''' % (docs, a, b, self.edge(color=color), a, b, self.fields_to_label(f))
+
+            if f.get("relation_type") == "ai":
+                docs = '''
+                      %s
+                      subgraph %s_%s {
+                          %s
+                          %s -> %s
+                          [label="%s"] [arrowhead=none, arrowtail=none, dir=both]
+                      }
+                ''' % (docs, a, b, self.edge(color=self.ai_color), a, b, self.fields_to_label(f))
+
+        return docs
+
+
+    def fields_to_label(self, f):
+
+        right = f.get("right")
+        left = f.get("left")
+        fields_str = left
+
+        if right == left:
+            fields_str = "%s, %s" % (fields_str, left)
+        else:
+            fields_str = "%s, %s - %s" % (fields_str, left, right)
+
+        return fields_str
