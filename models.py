@@ -48,7 +48,6 @@ class ColumnModel(Versioned, BASE):
 
     id = Column(Integer, primary_key=True)
     name = Column(String)
-    is_deleted = Column(Boolean, default=False)
     record_date = Column(DateTime, default=func.now())
 
     def __eq__(self, other):
@@ -61,10 +60,19 @@ class RelationModel(Versioned, BASE):
 
     id = Column(Integer, primary_key=True)
     record_date = Column(DateTime, default=func.now())
-    column_id = Column(Integer, ForeignKey("columnmodel.id"))
-    column = relationship(ColumnModel)
-    table_id = Column(Integer, ForeignKey("tablemodel.id"))
-    table = relationship(TableModel)
+    is_deleted = Column(Boolean, default=False)
+
+    columnl_id = Column(Integer, ForeignKey("columnmodel.id"))
+    columnr_id = Column(Integer, ForeignKey("columnmodel.id"))
+
+    columnl = relationship(ColumnModel, foreign_keys=[columnl_id])
+    columnr = relationship(ColumnModel, foreign_keys=[columnr_id])
+
+    tablel_id = Column(Integer, ForeignKey("tablemodel.id"))
+    tabler_id = Column(Integer, ForeignKey("tablemodel.id"))
+
+    tablel = relationship(TableModel, foreign_keys=[tablel_id])
+    tabler = relationship(TableModel, foreign_keys=[tabler_id])
 
     def __eq__(self, other):
         assert type(other) is RelationModel and other.id == self.id
