@@ -191,8 +191,35 @@ def get_or_create(session, model, **kwargs):
         session.commit()
         return instance
 
+
+def get_table_columns(database, req, filename, directory, **kwargs):
+
+    message = None
+    response = None
+
+    try:
+        model = modelize(directory=database)
+        columns = model.table_skeleton(name=req.get("name"))
+
+        if columns is None:
+            message = "Table %s not found" % req.get("name")
+
+        response = sorted(columns.get(req.get("name")))
+
+    except Exception as e:
+        message = str(e)
+        logging.error(e)
+
+    return response, message
+
+
+
+
+
+
 # All exposed function should be placed here
 func = {"listTables": list_table,
         "statistics": statistics,
         "tables": tables_descriptions,
-        "relation": relation}
+        "relation": relation,
+        "columns": get_table_columns}
