@@ -37,6 +37,7 @@ class Modelize(object):
             return None
 
         self.__extract_tables__(self.directory)
+        self.__process__()
 
 
     def dot_relations(self):
@@ -67,17 +68,26 @@ class Modelize(object):
 
         results = []
 
-        self.__process__()
-
         for db, table_list in self.docs.items():
             results.append({ "name" : db, "tables" : table_list })
 
         return results
 
 
+    def table_skeleton(self, name=None):
+        if name is None:
+            return None
+
+        for _, table_list in self.docs.items():
+            table = filter(lambda x: x.get("name") == name, table_list)
+            if len(table) != 0:
+                return {name: table.pop().get("fields")}
+
+        return None
+
+
     def statistics(self):
 
-        self.__process__()
         docs = {"tables_number": len(self.__tables__),
                 "columns_number": len(self.__fields__)}
 
