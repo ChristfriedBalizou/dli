@@ -36,12 +36,14 @@ def compute_relations(computed_relation):
     db_rels = []
     docs = defaultdict(list)
     for rel in computed_relation:
-        tablel = get_or_create(sess, TableModel, name=rel.get("a")).first()
-        tabler = get_or_create(sess, TableModel, name=rel.get("b")).first()
-        db_rels.extend(get_or_create(sess,
-                                     RelationModel,
-                                     tablel=tablel,
-                                     tabler=tabler).all())
+        tablel = get_or_create(sess, TableModel, name=rel.get("a"))
+        tabler = get_or_create(sess, TableModel, name=rel.get("b"))
+
+        rels = (sess.query(RelationModel)
+                .filter_by(tablel=tablel,
+                           tabler=tabler)
+                .all())
+        db_rels.extend(rels)
 
     for db_rel in db_rels:
         rela = {"left": db_rel.columnl.name,
@@ -154,27 +156,27 @@ def relation(database, req, filename, directory, **kwargs):
         # look for left table
         tablel = get_or_create(sess,
                                TableModel,
-                               name=req.get("table_left")).first()
+                               name=req.get("table_left"))
         # look for right table
         tabler = get_or_create(sess,
                                TableModel,
-                               name=req.get("table_right")).first()
+                               name=req.get("table_right"))
 
         field = req.get("field")
         left_col = get_or_create(sess,
                                  ColumnModel,
-                                 name=field.get("left")).first()
+                                 name=field.get("left"))
 
         right_col = get_or_create(sess,
                                   ColumnModel,
-                                  name=field.get("right")).first()
+                                  name=field.get("right"))
 
         rel = get_or_create(sess,
                             RelationModel,
                             tablel=tablel,
                             tabler=tabler,
                             columnl=left_col,
-                            columnr=right_col).first()
+                            columnr=right_col)
 
         rel.is_deleted=field.get("is_deleted")
 
@@ -187,9 +189,8 @@ def relation(database, req, filename, directory, **kwargs):
 
     return response, message
 
-
 def get_or_create(session, model, **kwargs):
-    instance = session.query(model).filter_by(**kwargs)
+    instance = session.query(model).filter_by(**kwargs).first()
     if instance:
         return instance
     else:
