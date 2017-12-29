@@ -6,6 +6,7 @@ dango-extensions graph_models which look more pleasant and clear
 https://github.com/django-extensions/django-extensions
 
 '''
+from collections import defaultdict
 
 
 class Dotit(object):
@@ -210,39 +211,53 @@ class Dotit(object):
 
         docs=""
 
+        by_relation_type = defaultdict(list)
+
         for f in fields:
+            key = f.get("relation_type")
+
+            if f.get("is_deleted") is True:
+                key = "deleted"
+
+            by_relation_type[key].append(f)
+
+
+        for rel, fields in by_relation_type.items():
 
             color = "#000000"
             style = "filled"
 
-            if f.get("relation_type") == "human":
+            if rel == "human":
                 color = self.h_color
 
-            if f.get("is_deleted") is True:
+            if rel == "ai":
+                color = self.ai_color
+
+            if rel == "deleted":
                 color = self.hdel_color
                 style = "dotted"
-
-            if f.get("relation_type") == "ai":
-                color = self.ai_color
 
             docs = '''
                 %s
                 %s -> %s [color="%s", fontcolor="%s", style=%s]
                 [label="%s"] [arrowhead=none, arrowtail=none, dir=both]
-            ''' % (docs, a, b, color, color, style, self.fields_to_label(f))
+            ''' % (docs, a, b, color, color, style, self.fields_to_label(fields))
 
         return docs
 
 
-    def fields_to_label(self, f):
+    def fields_to_label(self, fields):
 
-        right = f.get("right")
-        left = f.get("left")
-        fields_str = left
+        result = ""
 
-        if right == left:
-            fields_str = "%s" % (fields_str)
-        else:
-            fields_str = "%s - %s" % (left, right)
+        for f in fields:
 
-        return fields_str
+            right = f.get("right")
+            left = f.get("left")
+
+            if right == left:
+                result = "%s, %s" % (result, left)
+            else:
+                result = "%s, %s - %s" % (result, left, right)
+
+        return result[2:]
