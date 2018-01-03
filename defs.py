@@ -1,10 +1,14 @@
 from cli import modelize, draw
 from models import TableModel, ColumnModel, RelationModel, DBsession
 
+from auth.auth import Auth
+
 from collections import defaultdict
 import logging
 import os
 import json
+
+auth_context = Auth()
 
 def extension(filename, ext):
     '''
@@ -221,7 +225,47 @@ def get_table_columns(database, req, filename, directory, **kwargs):
     return response, message
 
 
+def login(database,
+               req,
+               filename,
+               directory,
+               authenticator=auth_context):
 
+    response = None
+    message = None
+
+    if not "auth" in req:
+        message = "Bad authentication request"
+
+    username = req.get("auth").get("username")
+    password = req.get("auth").get("password")
+
+    ok, user = authenticator.check_authentication(username, password)
+
+    if ok is True:
+        response = user.json()
+    else:
+        message = "Wrong username or password"
+
+    return response, message
+
+
+def logout(database,
+           req,
+           filename,
+           directory,
+           authenticator=auth_context):
+
+    response = None
+    message = None
+
+    if not "auth" in req:
+        message = "Bad authentication request"
+
+    username = req.get("auth").get("username")
+    authenticator.logout(username)
+
+    return response, message
 
 
 
@@ -230,4 +274,6 @@ func = {"listTables": list_table,
         "statistics": statistics,
         "tables": tables_descriptions,
         "relation": relation,
-        "columns": get_table_columns}
+        "columns": get_table_columns,
+        "auth_login": login,
+        "auth_logout": logout}

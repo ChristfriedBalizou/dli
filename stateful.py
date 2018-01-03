@@ -2,6 +2,7 @@
  A statefull version of libD
 '''
 from defs import func
+from auth.auth import Auth
 
 from multiprocessing import Pool
 from watchdog.observers import Observer
@@ -17,10 +18,31 @@ import shutil
 
 DIRECTORY = os.path.join('./', 'share')
 DATABASE_DIR = ""
+authenticator = Auth()
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
+
+
+def requires_auth(f):
+
+    def decorated(*args, **kwargs):
+        req = args[0]
+
+        if not "auth" in req:
+            return None, "Login is required to access this function"
+
+        username = req.get("auth").get("username")
+        password = req.get("auth").get("password")
+
+        ok, _ = authenticator.check_authentication(username, password)
+
+        if ok is True or req.get("action").startswith("auth_"):
+            return f(*args, **kwargs)
+        return None, "Wrong username or password"
+
+    return decorated
 
 
 def extension(filename, ext):
@@ -32,6 +54,7 @@ def extension(filename, ext):
     return "%s.%s" % (os.path.splitext(filename)[0], ext)
 
 
+@requires_auth
 def run_parrallel(args):
     '''
     Execute the given request in a different thread
