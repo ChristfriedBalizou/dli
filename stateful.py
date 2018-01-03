@@ -25,24 +25,20 @@ logging.basicConfig(level=logging.INFO,
                     datefmt='%Y-%m-%d %H:%M:%S')
 
 
-def requires_auth(f):
-
-    def decorated(*args, **kwargs):
-        req = args[0]
+def requires_auth(req, auth_context):
 
         if not "auth" in req:
-            return None, "Login is required to access this function"
+            return False, "Login is required to access this function"
 
         username = req.get("auth").get("username")
         password = req.get("auth").get("password")
 
-        ok, _ = authenticator.check_authentication(username, password)
+        ok, _ = auth_context.check_authentication(username, password)
 
-        if ok is True or req.get("action").startswith("auth_"):
-            return f(*args, **kwargs)
-        return None, "Wrong username or password"
+        if ok is False:
+            return ok, "Wrong username or password"
 
-    return decorated
+        return ok, None
 
 
 def extension(filename, ext):
@@ -54,7 +50,6 @@ def extension(filename, ext):
     return "%s.%s" % (os.path.splitext(filename)[0], ext)
 
 
-@requires_auth
 def run_parrallel(args):
     '''
     Execute the given request in a different thread
@@ -67,7 +62,11 @@ def run_parrallel(args):
     message = None
     action = req.get("action")
 
-    if not action in func:
+    ok, msg = requires_auth(req, authenticator)
+
+    if ok is False and not action.startswith("auth_"):
+        message = msg
+    elif not action in func:
         message = "Requested action {} not found".format(action)
     else:
        response, message = func[action](DATABASE_DIR, *args)
