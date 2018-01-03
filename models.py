@@ -9,6 +9,8 @@ from sqlalchemy import create_engine
 
 from history_meta import Versioned, versioned_session
 
+from passlib.context import CryptContext
+
 import os
 
 
@@ -19,6 +21,15 @@ SQLITE_DB_FILE = os.path.join(DATABASE_DIRECTORY, 'libd.sqlite')
 ENGINE = create_engine('sqlite:///' + SQLITE_DB_FILE)
 BASE = declarative_base()
 
+'''
+Reference https://passlib.readthedocs.io/en/1.6.5/new_app_quickstart.html
+'''
+pwd_context = CryptContext(
+    # replace this list with the hash(es) you wish to support.
+    # this example sets pbkdf2_sha256 as the default,
+    default="pbkdf2_sha256"
+    )
+
 # Create database directory if missing
 if os.path.exists(DATABASE_DIRECTORY) is False:
     os.mkdir(DATABASE_DIRECTORY)
@@ -28,6 +39,34 @@ def DBsession():
     Session = sessionmaker(bind=ENGINE)
     versioned_session(Session)
     return Session()
+
+
+class User(Versioned, BASE):
+
+    __tablename__ = 'user'
+
+    id = Column(Integer, primary_key=True)
+    first_name = Column(String)
+    last_name = Column(String)
+    email = Column(String)
+    username = Column(String)
+    password_hash = Column(String)
+    is_active = Column(Boolean, default=True)
+
+    def has_password(self, password):
+        self.password_hash = pwd_context.encrypt(password)
+
+
+    def verify_password(self, password):
+        return pwd_context.verify(password, self.password_hash)
+
+
+    def json(self):
+
+        return {"firstName": self.first_name,
+                "lastName": self.last_name,
+                "email": self.email,
+                "username": self.username}
 
 
 class TableModel(Versioned, BASE):
