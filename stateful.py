@@ -18,7 +18,7 @@ import shutil
 
 DIRECTORY = os.path.join('./', 'share')
 DATABASE_DIR = ""
-authenticator = Auth()
+authenticator = Auth.Instance()
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(message)s',
@@ -64,12 +64,16 @@ def run_parrallel(args):
 
     ok, msg = requires_auth(req, authenticator)
 
-    if ok is False and not action.startswith("auth_"):
-        message = msg
-    elif not action in func:
-        message = "Requested action {} not found".format(action)
-    else:
-       response, message = func[action](DATABASE_DIR, *args)
+    try:
+        if ok is False and not action.startswith("auth_"):
+            message = msg
+        elif not action in func:
+            message = "Requested action {} not found".format(action)
+        else:
+           response, message = func[action](DATABASE_DIR, *args)
+    except Exception as e:
+        message = str(e)
+        logging.error(e)
 
     file_path = os.path.join(directory, extension(filename, 'res'))
 

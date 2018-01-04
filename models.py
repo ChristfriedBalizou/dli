@@ -9,7 +9,7 @@ from sqlalchemy import create_engine
 
 from history_meta import Versioned, versioned_session
 
-from passlib.context import CryptContext
+from passlib.hash import pbkdf2_sha256
 
 import os
 
@@ -20,15 +20,6 @@ SQLITE_DB_FILE = os.path.join(DATABASE_DIRECTORY, 'libd.sqlite')
 
 ENGINE = create_engine('sqlite:///' + SQLITE_DB_FILE)
 BASE = declarative_base()
-
-'''
-Reference https://passlib.readthedocs.io/en/1.6.5/new_app_quickstart.html
-'''
-pwd_context = CryptContext(
-    # replace this list with the hash(es) you wish to support.
-    # this example sets pbkdf2_sha256 as the default,
-    default="pbkdf2_sha256"
-    )
 
 # Create database directory if missing
 if os.path.exists(DATABASE_DIRECTORY) is False:
@@ -54,11 +45,11 @@ class User(Versioned, BASE):
     is_active = Column(Boolean, default=True)
 
     def has_password(self, password):
-        self.password_hash = pwd_context.encrypt(password)
+        self.password_hash = pbkdf2_sha256.hash(password)
 
 
     def verify_password(self, password):
-        return pwd_context.verify(password, self.password_hash)
+        return pbkdf2_sha256.verify(password, self.password_hash)
 
 
     def json(self):
