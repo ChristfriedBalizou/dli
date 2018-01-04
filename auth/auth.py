@@ -81,7 +81,8 @@ class Auth(object):
         if len(obj) == 0 :
             return None
 
-        user = obj[0]
+        #take last in the list
+        user = obj.pop()
 
         return User(username=user.get("WSLOGIN"),
                     first_name=user.get("NOM"),
