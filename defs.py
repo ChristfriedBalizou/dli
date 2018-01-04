@@ -8,7 +8,7 @@ import logging
 import os
 import json
 
-auth_context = Auth()
+auth_context = Auth.Instance()
 
 def extension(filename, ext):
     '''
