@@ -19,7 +19,7 @@ start_watchdog () {
     outpath="~/src/libd.git/share"
 
     # start watchdog
-    if test $ENV -eq "prod"; then
+    if [ $ENV = "prod" ]; then
         inpath="~/balizou/src/libDWeb.git/share"
         adds=""
         outpath="~/prod/lbd/share"
@@ -30,7 +30,7 @@ start_watchdog () {
 
 start_webi() {
 
-    if test $ENV -eq "prod"; then
+    if [ $ENV = "prod" ]; then
         `/usr/bin/connect prj 1` 'python ~/balizou/src/libDWeb.git/app.py >> output.log 2>&1 &' &
     else
         nohup python ~/src/libDWeb.git/app.py >> output.log &
@@ -49,7 +49,7 @@ stop_core () {
 }
 
 stop_webi () {
-    if test $ENV -eq "prod"; then
+    if [ $ENV = "prod" ]; then
         `/usr/bin/connect prj 1` 'pkill -f "python app.py"'
     else
         pkill -f "python app.py"
@@ -58,18 +58,13 @@ stop_webi () {
 
 stop_watchdog () {
     inpath=~/src/libDWeb.git/share
-    adds=" --shared"
-
-    outpath="~/src/libd.git/share"
 
     # start watchdog
-    if test $ENV -eq "prod"; then
+    if [ $ENV = "prod" ]; then
         inpath="~/balizou/src/libDWeb.git/share"
-        adds=""
-        outpath="~/prod/lbd/share"
     fi    
         
-    pkill -f "watchdog -r $inpath -l $outpath -t 0.2 $adds"
+    pkill -f "watchdog -r $inpath"
 }
 
 stop_lbd () {
@@ -84,56 +79,49 @@ status_core () {
 
     if [ -z `pgrep -f "python $CORE_SCRIPT"` ]
     then
-        echo "Up    -> Core server"
-    else
         echo "Down    -> Core server"
+    else
+        echo "Up    -> Core server"
     fi
 }
 
 status_webi () {
-    if test $ENV -eq "prod"; then
-        
-        if [ -z `/usr/bin/connect prj 1` 'pgrep -f "python app.py"' ]
-        then
-            echo "Up    -> Web interface"
-        else
-            echo "Down    -> Web interface"
-        fi
+    
+    STATUS=`pgrep -f "/usr/bin/python app.py"`
+    
+    if [ $ENV = "prod" ]; then
+        STATUS=$(`/usr/bin/connect prj 1` 'pgrep -f "python app.py"')
+    fi
+  
+    if [ -z "$STATUS" ]; then
+        echo "Down    -> Web interface"
     else
-        if [ -z `pgrep -f "python app.py"` ]
-        then
-            echo "Up    -> Web interface"
-        else
-            echo "Down    -> Web interface"
-        fi
+        echo "Up    -> Web interface"
     fi
 }
 
 status_watchdog () {
     inpath=~/src/libDWeb.git/share
-    adds=" --shared"
-
     outpath="~/src/libd.git/share"
 
     # start watchdog
-    if test $ENV -eq "prod"; then
+    if [ $ENV = "prod" ]; then
         inpath="~/balizou/src/libDWeb.git/share"
-        adds=""
         outpath="~/prod/lbd/share"
 
-        if [ -z `$(connect decalog prj 1) 'pgrep -f "watchdog -r $inpath -l $outpath -t 0.2 $adds"'` ]
+        if [ -z `$(connect decalog prj 1) "'pgrep -f "watchdog -r $inpath"'"` ]
         then
-            echo "Up    -> Web interface"
+            echo "Down    -> Watchdog"
         else
-            echo "Down    -> Web interface"
+            echo "Up    -> Watchdog"
         fi
     fi    
-        
-    if [ -z `pgrep -f "watchdog -r $inpath -l $outpath -t 0.2 $adds"` ]
+    
+    if [ -z `pgrep -f "watchdog -r $inpath"` ]
     then
-        echo "Up    -> Web interface"
+        echo "Down    -> Watchdog"
     else
-        echo "Down    -> Web interface"
+        echo "Up    -> Watchdog"
     fi
 }
 
@@ -162,22 +150,18 @@ args_handler () {
 			--start)
 				shift
                 ACTION="start"
-				shift
 				;;
 			--stop)
 				shift
                 ACTION="stop"
-				shift
 				;;
 			--status)
 				shift
                 ACTION="status"
-				shift
 				;;
 			-e|--environement)
 				shift
                 ENV="status"
-				shift
 				;;
 			*)
 				break
@@ -190,13 +174,13 @@ args_handler () {
 {
     args_handler $@
 
-    if test $ENV -eq "prod"; then
+    if [ $ENV = "prod" ]; then
         CORE_SCRIPT="stateful_prod.py"
     fi
 
-    if test $ACTION -eq "start"; then
+    if [ $ACTION = "start" ]; then
         start_lbd
-    elif test $ACTION -eq "stop"; then
+    elif [ $ACTION = "stop" ]; then
         stop_lbd
     else 
         status_lbd
