@@ -87,11 +87,13 @@ status_core () {
 
 status_webi () {
     
-    STATUS=`pgrep -f "/usr/bin/python app.py"`
+    STATUS=`pgrep -f "libDWeb.git/app.py"`
     
     if [ $ENV = "prod" ]; then
         STATUS=$(`/usr/bin/connect prj 1` 'pgrep -f "python app.py"')
     fi
+
+
   
     if [ -z "$STATUS" ]; then
         echo "Down    -> Web interface"
