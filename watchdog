@@ -1,0 +1,57 @@
+#!/bin/bash
+
+CON_CMD="appdcl@prj-clappdecalog:"
+SPEED=0.5
+
+handle_arg () {
+
+    while test $# -gt 0;
+    do
+        case $1 in
+            -t|--time )
+                shift
+                if test $# -gt 0; then
+                    SPEED=$1
+                fi
+                shift
+                ;;
+            -s|--shared )
+                shift
+                CON_CMD=""
+                shift
+                ;;
+            -r|--remote )
+                shift
+                if test $# -gt 0; then
+                    REMOTE=$1
+                fi
+                shift
+                ;;
+            -l|--local )
+                shift
+                if test $# -gt 0; then
+                    LOCAL=$1
+                fi
+                shift
+                ;;
+            *)
+                break
+                ;;
+        esac
+    done
+
+}
+
+
+handle_arg $@
+
+{
+
+    while true; do
+        rsync --remove-source-files -azv --progress ${CON_CMD}${REMOTE}/*.req ${LOCAL} >> whatchdog.log 2> /dev/null 
+        rsync --remove-source-files -azv --progress ${LOCAL}/*.png ${CON_CMD}${REMOTE} >> whatchdog.log 2> /dev/null
+        rsync --remove-source-files -azv --progress ${LOCAL}/*.res ${CON_CMD}${REMOTE} >> whatchdog.log 2> /dev/null
+        sleep $SPEED
+    done
+
+}
