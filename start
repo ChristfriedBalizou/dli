@@ -1,0 +1,204 @@
+#!/bin/sh
+
+PACKAGE=`basename $0`
+ENV="local"
+ACTION="status"
+WORKDIR="~/src"
+CORE_SCRIPT="stateful.py"
+
+# START 
+start_core () {
+    # starting core server on stateful
+    nohup python $CORE_SCRIPT --database ~/src/tools/DECALOG_SCHEMA/ >> output.log &
+}
+
+start_watchdog () {
+    inpath=~/src/libDWeb.git/share
+    adds=" --shared"
+
+    outpath="~/src/libd.git/share"
+
+    # start watchdog
+    if test $ENV -eq "prod"; then
+        inpath="~/balizou/src/libDWeb.git/share"
+        adds=""
+        outpath="~/prod/lbd/share"
+    fi    
+        
+    nohup watchdog -r "$inpath" -l $outpath -t 0.2 $adds > /dev/null 2>&1 &
+}
+
+start_webi() {
+
+    if test $ENV -eq "prod"; then
+        `/usr/bin/connect prj 1` 'python ~/balizou/src/libDWeb.git/app.py >> output.log 2>&1 &' &
+    else
+        nohup python ~/src/libDWeb.git/app.py >> output.log &
+    fi
+}
+
+start_lbd () {
+    echo "Starting core " && start_core
+    echo "Starting watchdog " && start_watchdog
+    echo "Starting web interfate " && start_webi
+}
+
+# STOP
+stop_core () {
+    pkill -f "python $CORE_SCRIPT"
+}
+
+stop_webi () {
+    if test $ENV -eq "prod"; then
+        `/usr/bin/connect prj 1` 'pkill -f "python app.py"'
+    else
+        pkill -f "python app.py"
+    fi
+}
+
+stop_watchdog () {
+    inpath=~/src/libDWeb.git/share
+    adds=" --shared"
+
+    outpath="~/src/libd.git/share"
+
+    # start watchdog
+    if test $ENV -eq "prod"; then
+        inpath="~/balizou/src/libDWeb.git/share"
+        adds=""
+        outpath="~/prod/lbd/share"
+    fi    
+        
+    pkill -f "watchdog -r $inpath -l $outpath -t 0.2 $adds"
+}
+
+stop_lbd () {
+    echo "Stopping core " && stop_core
+    echo "Stopping watchdog " && stop_watchdog
+    echo "Stopping web interfate " && stop_webi
+}
+
+
+# STATUS
+status_core () {
+
+    if [ -z `pgrep -f "python $CORE_SCRIPT"` ]
+    then
+        echo "Up    -> Core server"
+    else
+        echo "Down    -> Core server"
+    fi
+}
+
+status_webi () {
+    if test $ENV -eq "prod"; then
+        
+        if [ -z `/usr/bin/connect prj 1` 'pgrep -f "python app.py"' ]
+        then
+            echo "Up    -> Web interface"
+        else
+            echo "Down    -> Web interface"
+        fi
+    else
+        if [ -z `pgrep -f "python app.py"` ]
+        then
+            echo "Up    -> Web interface"
+        else
+            echo "Down    -> Web interface"
+        fi
+    fi
+}
+
+status_watchdog () {
+    inpath=~/src/libDWeb.git/share
+    adds=" --shared"
+
+    outpath="~/src/libd.git/share"
+
+    # start watchdog
+    if test $ENV -eq "prod"; then
+        inpath="~/balizou/src/libDWeb.git/share"
+        adds=""
+        outpath="~/prod/lbd/share"
+
+        if [ -z `$(connect decalog prj 1) 'pgrep -f "watchdog -r $inpath -l $outpath -t 0.2 $adds"'` ]
+        then
+            echo "Up    -> Web interface"
+        else
+            echo "Down    -> Web interface"
+        fi
+    fi    
+        
+    if [ -z `pgrep -f "watchdog -r $inpath -l $outpath -t 0.2 $adds"` ]
+    then
+        echo "Up    -> Web interface"
+    else
+        echo "Down    -> Web interface"
+    fi
+}
+
+status_lbd () {
+
+    status_core && status_webi && status_watchdog
+}
+
+
+
+args_handler () {
+
+	while test $# -gt 0; do
+		case $1 in
+			-h|--help)
+				echo " "
+				echo "$PACKAGE [options]"
+				echo " "
+				echo "options:"
+				echo "--start                       Start lbD"
+				echo "--status                      See status"
+				echo "--stop                        Stop lbD"
+				echo "-e,    --environement         Working environement"
+				exit 0
+				;;
+			--start)
+				shift
+                ACTION="start"
+				shift
+				;;
+			--stop)
+				shift
+                ACTION="stop"
+				shift
+				;;
+			--status)
+				shift
+                ACTION="status"
+				shift
+				;;
+			-e|--environement)
+				shift
+                ENV="status"
+				shift
+				;;
+			*)
+				break
+				;;
+		esac
+	done
+
+}
+
+{
+    args_handler $@
+
+    if test $ENV -eq "prod"; then
+        CORE_SCRIPT="stateful_prod.py"
+    fi
+
+    if test $ACTION -eq "start"; then
+        start_lbd
+    elif test $ACTION -eq "stop"; then
+        stop_lbd
+    else 
+        status_lbd
+    fi
+}
