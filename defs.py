@@ -1,5 +1,5 @@
 from cli import modelize, draw
-from models import TableModel, ColumnModel, RelationModel, DBsession
+from models import TableModel, ColumnModel, RelationModel, User, DBsession
 
 from auth.auth import Auth
 
@@ -155,8 +155,14 @@ def relation(database, req, filename, directory, **kwargs):
     response = None
     message = None
 
+    username = req.get("auth").get("username")
+
     try:
         sess = DBsession()
+
+        # get user doing action
+        user = sess.query(User).filter_by(username=username).first()
+
         # look for left table
         tablel = get_or_create(sess,
                                TableModel,
@@ -183,6 +189,7 @@ def relation(database, req, filename, directory, **kwargs):
                             columnr=right_col)
 
         rel.is_deleted=field.get("is_deleted")
+        rel.user = user
 
         sess.commit()
         sess.close()

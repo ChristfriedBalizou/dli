@@ -91,6 +91,8 @@ class RelationModel(Versioned, BASE):
     id = Column(Integer, primary_key=True)
     record_date = Column(DateTime, default=func.now())
     is_deleted = Column(Boolean, default=False)
+    user_id = Column(Integer, ForeignKey("user.id"))
+    user = relationship(User)
 
     columnl_id = Column(Integer, ForeignKey("columnmodel.id"))
     columnr_id = Column(Integer, ForeignKey("columnmodel.id"))
