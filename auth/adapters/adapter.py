@@ -148,20 +148,19 @@ class Adapter(object):
         Marshall csv to dictionary
         '''
         if fmt == "csv":
-            return output.encode("utf-8").replace("\t", ",")
+            return output.replace("\t", ",")
 
         docs = []
-        with io.StringIO(output) as infile:
-            if fmt == "json":
-                return self.__to_dict__(infile)
+        if fmt == "json":
+            return self.__to_dict__(output)
 
-            if fmt == "sql":
-                return self.__to_table__(infile)
+        if fmt == "sql":
+            return self.__to_table__(output)
 
-            if fmt is None:
-                if self.fmt is "json":
-                    return self.__to_dict__(infile)
-                return self.__to_table__(infile)
+        if fmt is None:
+            if self.fmt is "json":
+                return self.__to_dict__(output)
+            return self.__to_table__(output)
 
 
     def __to_table__(self, infile):
@@ -170,9 +169,9 @@ class Adapter(object):
         return tabulate(reader, headers, tablefmt="orgtbl")
 
 
-    def __to_dict__(self, infile):
+    def __to_dict__(self, text):
         docs = []
-        for row in csv.DictReader(infile, delimiter='\t'):
+        for row in csv.DictReader(text.splitlines(), delimiter='\t'):
             doc = {key: value for key, value in row.items()}
             docs.append(doc)
 

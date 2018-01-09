@@ -114,7 +114,7 @@ class Sybase(Adapter):
          if self.has_error(output):
              raise SQLError(output)
 
-         return self.to_response(output, fmt=fmt)
+         return self.to_response(output.encode("utf-8"), fmt=fmt)
 
     def __run_parrallel__(self, req):
         self.connect(test=False)
