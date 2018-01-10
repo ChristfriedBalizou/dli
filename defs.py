@@ -1,8 +1,16 @@
 from cli import modelize, draw
-from models import TableModel, ColumnModel, RelationModel, User, DBsession
+from models import (
+        TableModel,
+        ColumnModel,
+        RelationModel,
+        User,
+        Meta,
+        DBsession
+        )
 
 from auth.auth import Auth
-
+from datetime import datetime
+from sqlalchemy import or_
 from collections import defaultdict
 import logging
 import os
@@ -32,13 +40,15 @@ def list_table(database, req, filename, directory):
     return response, message
 
 
-def compute_relations(computed_relation):
+def compute_relations(computed_relation, remove_deleted=False):
 
     sess = DBsession()
 
     # load relations from database
     db_rels = []
     docs = defaultdict(list)
+    deleted_rel = []
+
     for rel in computed_relation:
         tablel = get_or_create(sess, TableModel, name=rel.get("a"))
         tabler = get_or_create(sess, TableModel, name=rel.get("b"))
@@ -54,12 +64,21 @@ def compute_relations(computed_relation):
                 "right": db_rel.columnr.name,
                 "is_deleted": db_rel.is_deleted,
                 "relation_type": "human"}
+
+        if db_rel.is_deleted is True and remove_deleted is True:
+            deleted_rel.append((db_rel.tablel.name, db_rel.tabler.name,))
+            continue
+
         docs[(db_rel.tablel.name, db_rel.tabler.name,)].append(rela)
 
     res = []
 
     for rel in computed_relation:
         key = (rel.get("a"), rel.get("b"),)
+
+        if remove_deleted is True and key in deleted_rel:
+            continue
+
         if key in docs:
             docs[key] = remove_equal_relations(docs[key], rel.get("fields"))
         else:
@@ -275,6 +294,79 @@ def logout(database,
     return response, message
 
 
+def describ_table(database,
+                  req,
+                  filename,
+                  directory,
+                  **kwargs):
+
+    response = None
+    message = None
+
+    try:
+        sess = DBsession()
+
+        meta_table = get_or_create(sess, TableModel, name=req.get("name"))
+        meta_data = (sess.query(Meta)
+                         .filter_by(meta_table=meta_table)
+                         .all())
+
+        description = {}
+        tags = []
+        other = []
+        related = []
+        added_to_related = []
+
+        for m in meta_data:
+            if m.meta_type == "description":
+                description = m.json()
+            if m.meta_type == "tag":
+                tags.append(m.json())
+            if m.meta_type == "other":
+                other.append(m.json())
+            if m.meta_type == "related":
+                related.append(m.json())
+                added_to_related.append(m.description)
+
+        # get possible related from database and automaticaly
+        rels = (sess.query(RelationModel)
+                    .filter(or_(RelationModel.tablel==meta_table,
+                                   RelationModel.tabler==meta_table),
+                               RelationModel.is_deleted==False)
+                    .all())
+
+        for r in rels:
+            if r.tablel.name in added_to_related:
+                continue
+            if r.tabler.name in added_to_related:
+                continue
+
+            table_name = None
+            if r.tablel.name == meta_table.name:
+                table_name = r.tabler.name
+            else:
+                table_name = r.tablel.name
+
+            related.append({"description": table_name,
+                "type": "related",
+                "user": None,
+                "table": meta_table.name,
+                "column_name": None,
+                "record_date": datetime.now().strftime('%Y-%m-%d')
+                })
+            added_to_related.append(table_name)
+
+        response = {"description": description,
+                    "tags": tags,
+                    "other": other,
+                    "related": related}
+    except Exception as e:
+        message = str(e)
+        logging.error(e)
+
+    return response, message
+
+
 
 # All exposed function should be placed here
 func = {"listTables": list_table,
@@ -283,4 +375,5 @@ func = {"listTables": list_table,
         "relation": relation,
         "columns": get_table_columns,
         "auth_login": login,
-        "auth_logout": logout}
+        "auth_logout": logout,
+        "table": describ_table}

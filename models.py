@@ -84,6 +84,46 @@ class ColumnModel(Versioned, BASE):
         assert type(other) is ColumnModel and other.id == self.id
 
 
+class Meta(Versioned, BASE):
+
+    __tablename__ = 'meta'
+
+    id = Column(Integer, primary_key=True)
+    description = Column(String)
+    meta_type = Column(String)
+    is_deleted = Column(Boolean, default=False)
+    record_date = Column(DateTime, default=func.now())
+
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship(User)
+
+    meta_table_id = Column(Integer, ForeignKey('tablemodel.id'))
+    meta_table = relationship(TableModel)
+
+    meta_column_id = Column(Integer, ForeignKey('columnmodel.id'))
+    meta_column = relationship(ColumnModel)
+
+
+    def json(self):
+
+        table_name = None
+        column_name = None
+
+        if not self.meta_table == None:
+            table_name = self.meta_table.name
+
+        if not self.meta_column == None:
+            column_name = self.meta_column.name
+
+        return { "description": self.description,
+                 "type": self.meta_type,
+                 "user": self.user.json(),
+                 "table": table_name,
+                 "column_name": column_name,
+                 "record_date": self.record_date.strftime('%Y-%m-%d')
+                }
+
+
 class RelationModel(Versioned, BASE):
 
     __tablename__ = 'relationmodel'
