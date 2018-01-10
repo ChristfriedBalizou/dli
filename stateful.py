@@ -102,7 +102,7 @@ def run(filename, directory):
     except Exception as e:
         print e
 
-    p = Pool(2)
+    p = Pool(5)
     p.map(run_parrallel, requests)
 
     p.close()
