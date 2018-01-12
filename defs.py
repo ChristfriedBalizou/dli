@@ -347,9 +347,17 @@ def get_metadata(database,
                 else:
                     table_name = r.tablel.name
 
+                user = r.user
+
+                if user is None:
+                    user = User(email="lbdbot@libdbot.com",
+                                username="lbdbot",
+                                first_name="lbDbot",
+                                last_name="lbDbot")
+
                 response.append({"description": table_name,
                     "type": "related",
-                    "user": r.user.json(),
+                    "user": user.json(),
                     "table": meta_table.name,
                     "column_name": None,
                     "record_date": r.record_date.strftime('%Y-%m-%d %H:%M:%S')
