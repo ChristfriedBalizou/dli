@@ -108,7 +108,6 @@ class Meta(Versioned, BASE):
 
         table_name = None
         column_name = None
-        user = self.user
 
         if self.meta_table is not None:
             table_name = self.meta_table.name
@@ -116,16 +115,9 @@ class Meta(Versioned, BASE):
         if self.meta_column is not None:
             column_name = self.meta_column.name
 
-
-        if user is None:
-            user = User(username="lbdbot",
-                        first_name="lbDbot",
-                        last_name="lbDbot",
-                        email="lbdbot@lbdbot.com")
-
         return { "description": self.description,
                  "type": self.meta_type,
-                 "user": user.json(),
+                 "user": self.user.json(),
                  "table": table_name,
                  "column_name": column_name,
                  "record_date": self.record_date.strftime('%Y-%m-%d %H:%M:%S')
