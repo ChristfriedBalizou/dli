@@ -60,9 +60,19 @@ def compute_relations(computed_relation, remove_deleted=False):
         db_rels.extend(rels)
 
     for db_rel in db_rels:
+        user = db_rel.user
+
+        if user is None:
+            user = User(username="lbdbot",
+                        first_name="lbDbot",
+                        last_name="lbDbot",
+                        email="lbdbot@lbdbot.com")
+
         rela = {"left": db_rel.columnl.name,
                 "right": db_rel.columnr.name,
                 "is_deleted": db_rel.is_deleted,
+                "user": user.json(),
+                "record_date": db_rel.record_date.strftime("%Y-%M-%d %H:%M:%S"),
                 "relation_type": "human"}
 
         if db_rel.is_deleted is True and remove_deleted is True:
