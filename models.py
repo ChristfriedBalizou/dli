@@ -109,10 +109,10 @@ class Meta(Versioned, BASE):
         table_name = None
         column_name = None
 
-        if not self.meta_table == None:
+        if self.meta_table is not None:
             table_name = self.meta_table.name
 
-        if not self.meta_column == None:
+        if self.meta_column is not None:
             column_name = self.meta_column.name
 
         return { "description": self.description,
@@ -120,7 +120,7 @@ class Meta(Versioned, BASE):
                  "user": self.user.json(),
                  "table": table_name,
                  "column_name": column_name,
-                 "record_date": self.record_date.strftime('%Y-%m-%d')
+                 "record_date": self.record_date.strftime('%Y-%m-%d %H:%M:%S')
                 }
 
 

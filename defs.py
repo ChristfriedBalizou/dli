@@ -9,8 +9,8 @@ from models import (
         )
 
 from auth.auth import Auth
-from datetime import datetime
 from sqlalchemy import or_
+from sqlalchemy import func as datetime
 from collections import defaultdict
 import logging
 import os
@@ -209,6 +209,7 @@ def relation(database, req, filename, directory, **kwargs):
 
         rel.is_deleted=field.get("is_deleted")
         rel.user = user
+        rel.record_date = datetime.now()
 
         sess.commit()
         sess.close()
@@ -294,7 +295,7 @@ def logout(database,
     return response, message
 
 
-def describ_table(database,
+def get_metadata(database,
                   req,
                   filename,
                   directory,
@@ -302,69 +303,118 @@ def describ_table(database,
 
     response = None
     message = None
+    added_to_related = []
+
+    meta_type = req.get('meta_type')
 
     try:
         sess = DBsession()
 
         meta_table = get_or_create(sess, TableModel, name=req.get("name"))
         meta_data = (sess.query(Meta)
-                         .filter_by(meta_table=meta_table)
+                         .filter_by(meta_table=meta_table,
+                                    meta_type=meta_type,
+                                    is_deleted=False)
                          .all())
 
-        description = {}
-        tags = []
-        other = []
-        related = []
-        added_to_related = []
+        response = []
 
         for m in meta_data:
-            if m.meta_type == "description":
-                description = m.json()
-            if m.meta_type == "tag":
-                tags.append(m.json())
-            if m.meta_type == "other":
-                other.append(m.json())
-            if m.meta_type == "related":
-                related.append(m.json())
+            response.append(m.json())
+
+            if meta_type == "related":
                 added_to_related.append(m.description)
 
-        # get possible related from database and automaticaly
-        rels = (sess.query(RelationModel)
-                    .filter(or_(RelationModel.tablel==meta_table,
-                                   RelationModel.tabler==meta_table),
-                               RelationModel.is_deleted==False)
-                    .all())
+        if meta_type == "related":
 
-        for r in rels:
-            if r.tablel.name in added_to_related:
-                continue
-            if r.tabler.name in added_to_related:
-                continue
+            # get possible related from database and automaticaly
+            rels = (sess.query(RelationModel)
+                        .filter(or_(RelationModel.tablel==meta_table,
+                                    RelationModel.tabler==meta_table),
+                                RelationModel.is_deleted==False)
+                        .all())
 
-            table_name = None
-            if r.tablel.name == meta_table.name:
-                table_name = r.tabler.name
-            else:
-                table_name = r.tablel.name
 
-            related.append({"description": table_name,
-                "type": "related",
-                "user": None,
-                "table": meta_table.name,
-                "column_name": None,
-                "record_date": datetime.now().strftime('%Y-%m-%d')
-                })
-            added_to_related.append(table_name)
+            for r in rels:
+                if r.tablel.name in added_to_related:
+                    continue
+                if r.tabler.name in added_to_related:
+                    continue
 
-        response = {"description": description,
-                    "tags": tags,
-                    "other": other,
-                    "related": related}
+                table_name = None
+                if r.tablel.name == meta_table.name:
+                    table_name = r.tabler.name
+                else:
+                    table_name = r.tablel.name
+
+                response.append({"description": table_name,
+                    "type": "related",
+                    "user": r.user.json(),
+                    "table": meta_table.name,
+                    "column_name": None,
+                    "record_date": r.record_date.strftime('%Y-%m-%d %H:%M:%S')
+                    })
+                added_to_related.append(table_name)
+            added_to_related = []
     except Exception as e:
         message = str(e)
         logging.error(e)
 
     return response, message
+
+
+def create_or_update_metadata(database,
+                              req,
+                              filename,
+                              directory,
+                              **kwargs):
+
+    response = None
+    message = None
+
+    meta_type = req.get('meta_type')
+    username = req.get("auth").get("username")
+
+    try:
+        sess = DBsession()
+
+        user = sess.query(User).filter_by(username=username).first()
+        meta_table = get_or_create(sess, TableModel, name=req.get("name"))
+
+        if meta_type == "description":
+            meta =  get_or_create(sess,
+                                  Meta,
+                                  meta_table=meta_table,
+                                  meta_type=meta_type
+                              )
+            meta.description = req.get("description")
+        else:
+            meta =  get_or_create(sess,
+                                  Meta,
+                                  meta_table=meta_table,
+                                  meta_type=meta_type,
+                                  description=req.get("description"),
+                              )
+
+
+        meta.user = user
+        meta.is_deleted = False
+        meta.record_date = datetime.now()
+
+        if req.get("delete", False) is True:
+            meta.is_deleted = True
+
+
+        sess.commit()
+        sess.close()
+
+    except Exception as e:
+        message = str(e)
+        logging.error(e)
+
+    return response, message
+
+
 
 
 
@@ -376,4 +426,6 @@ func = {"listTables": list_table,
         "columns": get_table_columns,
         "auth_login": login,
         "auth_logout": logout,
-        "table": describ_table}
+        "metadata": get_metadata,
+        "create_or_update_metadata": create_or_update_metadata,
+        }
