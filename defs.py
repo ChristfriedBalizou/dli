@@ -296,10 +296,10 @@ def logout(database,
 
 
 def get_metadata(database,
-                  req,
-                  filename,
-                  directory,
-                  **kwargs):
+                 req,
+                 filename,
+                 directory,
+                 **kwargs):
 
     response = None
     message = None
@@ -309,12 +309,26 @@ def get_metadata(database,
 
     try:
         sess = DBsession()
+        wildcard = {}
+        category = req.get("category")
+        model = ColumnModel
 
-        meta_table = get_or_create(sess, TableModel, name=req.get("name"))
+        if category == "table":
+            model = TableModel
+
+        entity = get_or_create(sess, model, name=req.get("name"))
+
+
+        if category == "table":
+            wildcard["meta_table"] = entity
+        else:
+            wildcard["meta_column"] = entity
+
         meta_data = (sess.query(Meta)
-                         .filter_by(meta_table=meta_table,
-                                    meta_type=meta_type,
-                                    is_deleted=False)
+                         .filter_by(meta_type=meta_type,
+                                    is_deleted=False,
+                                    **wildcard
+                                    )
                          .all())
 
         response = []
@@ -322,15 +336,15 @@ def get_metadata(database,
         for m in meta_data:
             response.append(m.json())
 
-            if meta_type == "related":
+            if meta_type == "related" and category != "column":
                 added_to_related.append(m.description)
 
-        if meta_type == "related":
+        if meta_type == "related" and category != "column":
 
             # get possible related from database and automaticaly
             rels = (sess.query(RelationModel)
-                        .filter(or_(RelationModel.tablel==meta_table,
-                                    RelationModel.tabler==meta_table),
+                        .filter(or_(RelationModel.tablel==entity,
+                                    RelationModel.tabler==entity),
                                 RelationModel.is_deleted==False)
                         .all())
 
@@ -342,7 +356,7 @@ def get_metadata(database,
                     continue
 
                 table_name = None
-                if r.tablel.name == meta_table.name:
+                if r.tablel.name == entity.name:
                     table_name = r.tabler.name
                 else:
                     table_name = r.tablel.name
@@ -358,7 +372,7 @@ def get_metadata(database,
                 response.append({"description": table_name,
                     "type": "related",
                     "user": user.json(),
-                    "table": meta_table.name,
+                    "table": entity.name,
                     "column_name": None,
                     "record_date": r.record_date.strftime('%Y-%m-%d %H:%M:%S')
                     })
@@ -383,27 +397,38 @@ def create_or_update_metadata(database,
     meta_type = req.get('meta_type')
     username = req.get("auth").get("username")
 
+
     try:
         sess = DBsession()
-
+        wildcard = {}
         user = sess.query(User).filter_by(username=username).first()
-        meta_table = get_or_create(sess, TableModel, name=req.get("name"))
+        model = ColumnModel
+
+        if req.get("category") == "table":
+            model = TableModel
+
+        entity = get_or_create(sess, model, name=req.get("name"))
+
+
+        if req.get("category") == "table":
+            wildcard["meta_table"] = entity
+        else:
+            wildcard["meta_column"] = entity
 
         if meta_type == "description":
             meta =  get_or_create(sess,
                                   Meta,
-                                  meta_table=meta_table,
-                                  meta_type=meta_type
+                                  meta_table=entity,
+                                  **wildcard
                               )
             meta.description = req.get("description")
         else:
             meta =  get_or_create(sess,
                                   Meta,
-                                  meta_table=meta_table,
                                   meta_type=meta_type,
                                   description=req.get("description"),
+                                  **wildcard
                               )
-
 
         meta.user = user
         meta.is_deleted = False
