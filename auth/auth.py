@@ -1,5 +1,5 @@
 from db import Database
-from models import DBsession, User
+from model.models import DBsession, User
 
 import os
 import json

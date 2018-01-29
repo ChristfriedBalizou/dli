@@ -15,7 +15,7 @@ import os
 
 
 FILE_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
-DATABASE_DIRECTORY = os.path.join(FILE_DIRECTORY, 'db')
+DATABASE_DIRECTORY = os.path.join(FILE_DIRECTORY, '..', 'db')
 SQLITE_DB_FILE = os.path.join(DATABASE_DIRECTORY, 'libd.sqlite')
 
 ENGINE = create_engine('sqlite:///' + SQLITE_DB_FILE)
