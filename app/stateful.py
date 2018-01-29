@@ -18,7 +18,7 @@ import shutil
 
 
 CURRENT_DIRECTORY = os.path.dirname(os.path.relpath(__file__))
-DIRECTORY = os.path.join(CURRENT_DIRECTORY, 'share')
+DIRECTORY = os.path.join(CURRENT_DIRECTORY, '..', 'share')
 DATABASE_DIR = ""
 authenticator = Auth.Instance()
 
