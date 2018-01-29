@@ -1,4 +1,3 @@
-from cli import modelize, draw
 from models import (
         TableModel,
         ColumnModel,
@@ -7,6 +6,11 @@ from models import (
         Meta,
         DBsession
         )
+
+from tools.modelize import Modelize
+from tools.template import Dotit
+
+import pygraphviz as graph
 
 from auth.auth import Auth
 from sqlalchemy import or_
@@ -17,6 +21,37 @@ import os
 import json
 
 auth_context = Auth.Instance()
+
+def modelize(**kwargs):
+    '''
+    modelize introspect and extract data in json format
+    '''
+    return Modelize(**kwargs)
+
+
+def draw(filename, layout, **kwargs):
+    '''
+    Use pygraph to draw class diagram
+    '''
+
+    dot = Dotit(**kwargs)
+
+    libdG = graph.AGraph(dot.render())
+    libdG.layout(prog=layout)
+
+    output = os.path.expanduser(filename)
+    directory = os.path.dirname(output)
+
+    if directory == '':
+        directory = './'
+
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    libdG.draw(output)
+
+    return output
+
 
 def extension(filename, ext):
     '''

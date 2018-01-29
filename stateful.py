@@ -16,13 +16,18 @@ import json
 import time
 import shutil
 
-DIRECTORY = os.path.join('./', 'share')
+
+CURRENT_DIRECTORY = os.path.dirname(os.path.relpath(__file__))
+DIRECTORY = os.path.join(CURRENT_DIRECTORY, 'share')
 DATABASE_DIR = ""
 authenticator = Auth.Instance()
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
+
+if os.path.exists(DIRECTORY) is False:
+    os.mkdir(DIRECTORY)
 
 
 def requires_auth(req, auth_context):

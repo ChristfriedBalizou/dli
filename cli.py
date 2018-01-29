@@ -2,88 +2,29 @@
 cli.py
 '''
 
-from tools.modelize import Modelize
-from tools.template import Dotit
-
-import pygraphviz as graph
+from defs import func
 
 import argparse
 import sys
 import os
+import json
 
-
-def modelize(**kwargs):
-    '''
-    modelize introspect and extract data in json format
-    '''
-    return Modelize(**kwargs)
-
-
-def draw(filename, layout, **kwargs):
-    '''
-    Use pygraph to draw class diagram
-    '''
-
-    dot = Dotit(**kwargs)
-
-    libdG = graph.AGraph(dot.render())
-    libdG.layout(prog=layout)
-
-    output = os.path.expanduser(filename)
-    directory = os.path.dirname(output)
-
-    if directory == '':
-        directory = './'
-
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
-    libdG.draw(output)
-
-    return output
-
+CURRENT_DIRECTORY = os.path.dirname(os.path.relpath(__file__))
+DIRECTORY = os.path.join(CURRENT_DIRECTORY, 'share')
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-o', '--output',
-                        default='diagram.png',
-                        help='Output file path')
-
-    parser.add_argument('-r', '--relations',
-                        default=False,
-                        action='store_true',
-                        help='Draw relations on graph if mentioned')
-
-    parser.add_argument('--print-tables',
-                        default=False,
-                        action='store_true',
-                        help='Print all tables in database scheme')
-
-    parser.add_argument('--statistics',
-                        default=False,
-                        action='store_true',
-                        help='Print statistics on given or all tables')
-
-    parser.add_argument('-t', '--table-list',
-                        default=[],
-                        nargs='*',
-                        dest='table_list',
-                        help='Table list to match')
-
-    parser.add_argument('-i', '--input-directory',
+    parser.add_argument('-d', '--database-directory',
                         default=None,
                         dest='directory',
-                        help='Tables scheme directory')
+                        help='Database directory')
 
-    parser.add_argument('-p', '--pattern',
-                        default='^REC',
-                        help="Do not create relation with the follogin match")
-
-    parser.add_argument('-l', '--layout',
-                        default='dot',
-                        help="Program used by Graphiz to draw the graph")
+    parser.add_argument('infile',
+                        nargs='?',
+                        type=argparse.FileType('r'),
+                        default=sys.stdin)
 
     options = parser.parse_args()
 
@@ -91,20 +32,21 @@ if __name__ == "__main__":
         parser.print_help()
         sys.exit(1)
 
-    model = modelize(table_list=options.table_list,
-                    directory=options.directory,
-                     draw_relations=options.relations,
-                     relation_criterion=options.pattern)
+    if os.path.exists(DIRECTORY) is False:
+        os.mkdir(DIRECTORY)
 
-    if options.print_tables:
-        print model.tables()
+    req = json.loads(options.infile.read())
 
-    if options.statistics:
-        print model.statistics()
-        sys.exit(0)
+    response = None
+    message = None
+    action = req.get("action")
 
-    # FIXME this will crash
-    print  draw(docs=model.dot(),
-                relations=model.dot_relations(),
-                filename=options.directory,
-                layout=options.layout)
+    try:
+        if not action in func:
+            message = "Requested action {} not found".format(action)
+        else:
+            response, message = func[action](options.directory, req, "cli.req", DIRECTORY)
+    except Exception as e:
+        message = str(e)
+
+    print json.dumps({"response" : response, "message": message}, indent=4)
