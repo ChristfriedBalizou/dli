@@ -110,9 +110,9 @@ def is_png(data):
 
 def response_from_file(filename, status):
     docs = { "data" : None, "message" : None }
+    short_filename = os.path.basename(filename)
 
     if status is True:
-        short_filename = os.path.basename(filename)
         logging.info("Response file %s recieved" % short_filename)
         with open(filename) as reader:
             res = json.load(reader)
