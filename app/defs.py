@@ -10,7 +10,10 @@ from model.models import (
 from tools.modelize import Modelize
 from tools.template import Dotit
 
-import pygraphviz as graph
+try:
+    import pygraphviz as graph
+except ImportError:
+    pass
 
 from auth.auth import Auth
 from sqlalchemy import or_
