@@ -1,0 +1,74 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Welcome on lbDi{%endblock%}</title>
+        <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='fonts/MaterialIcons.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='libs/material/material.min.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='libs/typeahead/typeaheadjs.min.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+    </head>
+
+    <body>
+        <!-- Always shows a header, even in smaller screens. -->
+        <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+            {% block header %}
+            <header class="mdl-layout__header">
+                <div class="mdl-layout__header-row">
+                    <h4 class="site-header__title">
+                        <a href="/" class="site-header__root-link">lbDi</a>
+                    </h4>
+                    <!-- Add spacer, to align navigation to the right  -->
+                    <div class="mdl-layout-spacer"></div>
+                    <span class="username mdl-color-text--white"></span>
+                    <button id="auth-menu-lower-right"
+                            class="mdl-button mdl-js-button mdl-button--icon">
+                        <i class="material-icons">more_vert</i>
+                    </button>
+
+                    <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu"
+                        for="auth-menu-lower-right">
+                        <li disabled class="mdl-menu__item mdl-menu__item--full-bleed-divider">Audit Trail</li>
+                        <li disabled class="mdl-menu__item">Change password</li>
+                        <li class="mdl-menu__item"><a href="/#logout">Logout</a></li>
+                    </ul>
+                    <!-- Navigation. We hide it in small screens. -->
+                    <nav class="mdl-navigation mdl-layout--large-screen-only">
+                    </nav>
+                </div>
+            </header>
+            {% endblock %}
+            <main class="mdl-layout__content">
+                <div class="page-content">
+                    {% block content %}
+                    {% endblock %}
+                </div>
+            </main>
+        </div>
+
+        <div id="snackbar" class="mdl-js-snackbar mdl-snackbar">
+            <div class="mdl-snackbar__text"></div>
+            <button class="mdl-snackbar__action" type="button"></button>
+        </div>
+
+        <script src="{{ url_for('static', filename='libs/findIndex.js') }}"></script>
+        <script src="{{ url_for('static', filename='libs/cryptojs/core.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='libs/cryptojs/md5.js') }}"></script>
+        <script src="{{ url_for('static', filename='libs/material/material.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='libs/react/react.production.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='libs/react/react-dom.production.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='libs/openseadragon.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='libs/jquery.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='libs/typeahead/typeahead.bundle.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/cache.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/loader.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/snackbar.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/server.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/route.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/meta.component.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/description.component.js') }}"></script>
+        {% block js %}
+        {% endblock %}
+    </body>
+</html>

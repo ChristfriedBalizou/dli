@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<!-- LOGIN -->
+<div class="wide" data-page="login">
+{% include "login.html" %}
+</div>
+
+<!-- HOME -->
+<div class="wide" data-page="home">
+{% include "home.html" %}
+</div>
+
+<!-- LOOKUP PAGE -->
+<div class="wide" data-page="relation">
+{% include "relation.html" %}
+</div>
+
+<!-- TABLE PAGE -->
+<div class="wide" data-page="table">
+{% include "table.html" %}
+</div>
+
+<!-- COLUMN PAGE -->
+<div class="wide" data-page="column">
+{% include "column.html" %}
+</div>
+
+{% endblock %}
+ose a utility bill
+{% block js %}
+<script src="{{ url_for('static', filename='js/relations.js') }}"></script>
+<script src="{{ url_for('static', filename='js/page.home.js') }}"></script>
+<script src="{{ url_for('static', filename='js/page.relation.js') }}"></script>
+<script src="{{ url_for('static', filename='js/page.login.js') }}"></script>
+<script src="{{ url_for('static', filename='js/page.table.js') }}"></script>
+<script src="{{ url_for('static', filename='js/page.column.js') }}"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% endblock %}

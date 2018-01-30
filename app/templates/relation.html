@@ -1,0 +1,73 @@
+<div class="mdl-grid">
+    <div class="mdl-cell mdl-cell--12-col">
+        <span class="mdl-chip mdl-color--white">
+            <span class="mdl-chip__text mdl-color-text--grey-400">Explore</span>
+        </span>
+        <div class="mdl-card wide auto-height mdl-shadow--2dp">
+            <div class="mdl-card__supporting-text">
+                <div id="table-explore-list"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mdl-grid">
+    <div class="mdl-cell mdl-cell--9-col">
+        <div class="mdl-card wide auto-height mdl-shadow--2dp">
+            <div class="diagram-container">
+                <div class="bar">
+                    <span class="left mdl-chip mdl-color--grey-200">
+                        <span class="mdl-chip__text mdl-color-text--grey-400">Diagram</span>
+                    </span>
+                    <div class="wrapper">
+                        <div class="inline">
+                            <button id="reload-graph" class="mdl-button mdl-js-button mdl-button--primary">Reload graph </button>
+                        </div>
+                        <div class="inline">
+                            <label class="mdl-switch mdl-js-switch" for="diagram-cols">
+                                <input type="checkbox" id="diagram-cols" class="mdl-switch__input">
+                                <span class="mdl-switch__label">Show columns</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mdl-card__supporting-text wide relation-image-container">
+                    <img src="/static/loading.gif" class="hide relation-image"/>
+                    <div id="image-dragon"></div>
+                    <div class="image-loading-message">
+                        <i class="material-icons">broken_image</i>
+                        <br>
+                        <h4> Loading image failed please reload page.</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mdl-cell mdl-cell--3-col">
+        <div class="mdl-card wide auto-height mdl-shadow--2dp">
+            <div class="bar">
+                <span class="left mdl-chip mdl-color--grey-200 no-padding">
+                    <span class="mdl-chip__text mdl-color-text--grey-400">Manage relations</span>
+                </span>
+                <div class="wrapper" style="right: 0">
+                    <button id="demo-menu-lower-right"
+                            class="mdl-button mdl-js-button mdl-button--icon">
+                        <i class="material-icons">more_vert</i>
+                    </button>
+
+                    <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu"
+                        for="demo-menu-lower-right">
+                        <li class="mdl-menu__item" id="new-relation">Add new relation</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mdl-card__supporting-text wide">
+                <div id="relations-link">
+                    <div id="relations-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
