@@ -324,7 +324,7 @@ def relation(table_left, table_right):
 def run(options):
 
     APP.config["DATABASE_DIR"] = os.path.expanduser(options.database)
-    APP.run(port=options.port, host=options.server)
+    APP.run(port=options.port, host=options.server, processes=5)
 
 
 if __name__ == '__main__':
