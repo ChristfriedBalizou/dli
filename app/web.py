@@ -27,7 +27,7 @@ logging.basicConfig(level=logging.INFO,
         format='%(asctime)-15s %(funcName)-8s %(levelname)-8s : %(message)s')
 
 CURRENT_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
-DIRECTORY = os.path.join(CURRENT_DIRECTORY, '..', '.share')
+DIRECTORY = os.path.join(CURRENT_DIRECTORY, '..', 'share')
 
 APP = Flask(__name__)
 APP.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
