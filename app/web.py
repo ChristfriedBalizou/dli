@@ -75,7 +75,7 @@ def run_request(obj):
     reqfile = None
     action = obj.get("action")
 
-    if action != "relation":
+    if action != "tables":
         return func[action](APP.config.get("DATABASE_DIR"),
                             obj,
                             None,
@@ -143,7 +143,7 @@ def process(req, authorization=None):
 
     filename, status, elapsed = run_request(req)
 
-    if req.get('action') != 'relation':
+    if req.get('action') != 'tables':
         docs["data"] = filename
         docs["message"] = status
         status = True
