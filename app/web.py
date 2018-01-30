@@ -144,7 +144,8 @@ def process(req, authorization=None):
     filename, status, elapsed = run_request(req)
 
     if req.get('action') != 'relation':
-        docs["data"] = {"response": filename, "message": status}
+        docs["data"] = filename
+        docs["message"] = status
         status = True
     else:
         docs = response_from_file(filename, status)
