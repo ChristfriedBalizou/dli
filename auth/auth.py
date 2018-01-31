@@ -72,6 +72,9 @@ class Auth(object):
 
     def lookup_in_db(self, username):
 
+        # prevent sql injection
+        username = username.replace("'", "")
+
         json_str = (self.database
                    .select("select * from SYN_USER WHERE WSLOGIN='%s'" % username,
                            fmt="json"))
