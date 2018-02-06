@@ -8,7 +8,6 @@ from model.models import (
         )
 
 from tools.modelize import Modelize
-from defs import compute_relations, get_relations_from_db
 from multiprocessing import Pool
 from sqlalchemy import func
 from sqlalchemy import or_
