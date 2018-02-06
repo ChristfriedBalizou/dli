@@ -124,6 +124,10 @@ class Modelize(object):
         return sorted(self.tables().keys())
 
 
+    def list_fields(self):
+        return sorted(self.__fields__.keys())
+
+
     def tables(self):
         return self.__tables__
 
