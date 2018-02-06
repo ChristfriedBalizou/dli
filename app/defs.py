@@ -9,6 +9,7 @@ from model.models import (
 
 from tools.modelize import Modelize
 from tools.template import Dotit
+from full_text_search import query_search
 
 try:
     import pygraphviz as graph
@@ -496,7 +497,18 @@ def create_or_update_metadata(database,
     return response, message
 
 
+def text_search(database, req, filename, directory):
 
+    response = None
+    message = None
+
+    try:
+        response = query_search(req.get("query"), database)
+    except Exception as e:
+        message = str(e)
+        logging.error(e)
+
+    return response, message
 
 
 # All exposed function should be placed here
@@ -509,4 +521,5 @@ func = {"listTables": list_table,
         "auth_logout": logout,
         "metadata": get_metadata,
         "create_or_update_metadata": create_or_update_metadata,
+        "search": text_search
         }
