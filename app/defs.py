@@ -79,12 +79,14 @@ def list_table(database, req, filename, directory):
     return response, message
 
 
-def get_relations_from_db(computed_relation):
+def compute_relations(computed_relation, remove_deleted=False):
 
     sess = DBsession()
 
     # load relations from database
     db_rels = []
+    docs = defaultdict(list)
+    deleted_rel = []
 
     for rel in computed_relation:
         tablel = get_or_create(sess, TableModel, name=rel.get("a"))
@@ -96,23 +98,7 @@ def get_relations_from_db(computed_relation):
                 .all())
         db_rels.extend(rels)
 
-    return db_rels
-
-
-def compute_relations(computed_relation, db_rels, remove_deleted=False, tabs=[]):
-
-    docs = defaultdict(list)
-    deleted_rel = []
-
     for db_rel in db_rels:
-
-        if db_rel.is_deleted is True and remove_deleted is True:
-            deleted_rel.append((db_rel.tablel.name,
-                                db_rel.tabler.name,
-                                db_rel.columnl.name,
-                                db_rel.columnr.name))
-            continue
-
         user = db_rel.user
 
         if user is None:
@@ -128,34 +114,30 @@ def compute_relations(computed_relation, db_rels, remove_deleted=False, tabs=[])
                 "record_date": db_rel.record_date.strftime("%Y-%M-%d %H:%M:%S"),
                 "relation_type": "human"}
 
+        if db_rel.is_deleted is True and remove_deleted is True:
+            deleted_rel.append((db_rel.tablel.name, db_rel.tabler.name,))
+            continue
+
         docs[(db_rel.tablel.name, db_rel.tabler.name,)].append(rela)
 
+    res = []
 
     for rel in computed_relation:
         key = (rel.get("a"), rel.get("b"),)
 
-        if key not in docs\
-                and rel.get("a") not in tabs\
-                and rel.get("b") not in tabs:
+        if remove_deleted is True and key in deleted_rel:
             continue
 
-        for field in rel.get("fields"):
+        if key in docs:
+            docs[key] = remove_equal_relations(docs[key], rel.get("fields"))
+        else:
+            docs[key] = rel.get("fields")
 
-            delete_key = key + (field.get("left"), field.get("right"),)
-
-            if remove_deleted is True and delete_key in deleted_rel:
-                continue
-
-            docs[key].append(field)
-
-    res = []
-
-    for (left_table, right_table), fields in docs.items():
-        res.append({
-            "a": left_table,
-            "b": right_table,
-            "fields": fields
-            })
+    for key, value in docs.items():
+        left_table, right_table = key
+        res.append({"a": left_table,
+                    "b": right_table,
+                    "fields": value})
 
     return res
 
@@ -194,9 +176,7 @@ def tables_descriptions(database, req, filename, directory):
         file_path = os.path.join(directory, new_filename)
 
         docs = model.dot()
-        computed_relation = model.dot_relations()
-        database_relation = get_relations_from_db(computed_relation)
-        relations = compute_relations(computed_relation, database_relation)
+        relations = compute_relations(model.dot_relations())
         draw(file_path,
              'dot',
              docs=docs,
