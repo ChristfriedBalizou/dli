@@ -2,7 +2,7 @@
   All database model
 '''
 
-from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, DateTime, func
+from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, DateTime, types, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy import create_engine
@@ -30,6 +30,27 @@ def DBsession():
     Session = sessionmaker(bind=ENGINE)
     versioned_session(Session)
     return Session()
+
+
+class ChoiceType(types.TypeDecorator):
+    '''
+    SQLAlchemy - How to make "choices" using SQLAlchemy?
+    https://stackoverflow.com/a/6264027
+
+    type = Column(ChoiceType([('toto', 'toto'), ('tata', 'tata')]))
+    '''
+
+    impl = types.String
+
+    def __init__(self, choices, **kw):
+        self.choices = dict(choices)
+        super(ChoiceType, self).__init__(**kw)
+
+    def process_bind_param(self, value, dialect):
+        return [k for k, v in self.choices.iteritems() if v == value][0]
+
+    def process_result_value(self, value, dialect):
+        return self.choices[value]
 
 
 class User(Versioned, BASE):
@@ -88,9 +109,16 @@ class Meta(Versioned, BASE):
 
     __tablename__ = 'meta'
 
+    TYPES = [
+        (u'description', u'description'),
+        (u'related', u'related'),
+        (u'tag', u'tag'),
+        (u'other', u'other')
+    ]
+
     id = Column(Integer, primary_key=True)
     description = Column(String)
-    meta_type = Column(String)
+    meta_type = Column(ChoiceType(TYPES))
     is_deleted = Column(Boolean, default=False)
     record_date = Column(DateTime, default=func.now())
 
