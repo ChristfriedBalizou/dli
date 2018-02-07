@@ -470,6 +470,88 @@ a.no-decoration {
 
 
 /* For home page */
+#home-page-container .mdl-grid {
+  min-height: 100em;
+}
+
+#home-page-container .mdl-card {
+  height: auto !important;
+  min-height: auto !important;
+  width: 100% !important;
+}
+
+#home-page-container .title p > span {
+    color: #3F51B5;
+    font-size: 3em;
+    font-weight: bold;
+}
+
+#home-page-container .results ul > li {
+    overflow: visible;
+    height: auto !important;
+    width: 45%;
+    padding: 0 !important;
+    padding-bottom: 2em !important;
+    line-height: 1.3em;
+}
+
+#home-page-container .results ul > li .label {
+    color: #1a0dab !important;
+    font-size: 1.2em !important;
+}
+
+#home-page-container .results ul > li .creator { 
+    font-size: .8em;
+    color: #999;
+    line-height: 2;
+}
+
+#home-page-container .results ul > li .long-text {
+    color: #545454;
+}
+
+#home-page-container .results ul > li .link {
+    color: #006621 !important;
+    font-size: .9em !important;
+}
+
+#home-page-container .title p > small {
+    color: #777;
+    font-size: 1em;
+}
+
+#home-page-container .wide.mdl-card__supporting-text {
+  width: 97% !important;
+}
+
+#home-page-container .mdl-textfield__input {
+    height: 4em !important;
+    padding-left: 1em;
+}
+
+#home-page-container #text-search {
+    border-bottom: none;
+}
+
+#home-page-container .mdl-textfield__label {
+    padding-left: 1em;
+}
+
+#home-page-container .mdl-textfield__label i {
+   position: relative;
+   top: 7;
+   line-height:0;
+}
+
+#home-page-container div .mdl-textfield__label:after {
+  background: transparent;
+}
+
+.result-statistic {
+    color: #808080;
+    font-size: 1em;
+}
+
 #prerelation-page-container .mdl-grid {
   min-height: 100em;
 }
