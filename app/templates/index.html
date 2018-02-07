@@ -11,6 +11,11 @@
 {% include "home.html" %}
 </div>
 
+<!-- PRERELATION -->
+<div class="wide" data-page="prerelation">
+{% include "prerelation.html" %}
+</div>
+
 <!-- LOOKUP PAGE -->
 <div class="wide" data-page="relation">
 {% include "relation.html" %}
@@ -31,6 +36,7 @@ ose a utility bill
 {% block js %}
 <script src="{{ url_for('static', filename='js/relations.js') }}"></script>
 <script src="{{ url_for('static', filename='js/page.home.js') }}"></script>
+<script src="{{ url_for('static', filename='js/page.prerelation.js') }}"></script>
 <script src="{{ url_for('static', filename='js/page.relation.js') }}"></script>
 <script src="{{ url_for('static', filename='js/page.login.js') }}"></script>
 <script src="{{ url_for('static', filename='js/page.table.js') }}"></script>
