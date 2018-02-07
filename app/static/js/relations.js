@@ -172,6 +172,7 @@ var relations = (function(){
                           tableRight: this.props.tableRight}
 
             this.handleCheckboxChange = this.handleCheckboxChange.bind(this, this.state);
+            this.handleCheckboxClick = this.handleCheckboxClick.bind(this);
         }
 
         componentDidMount() {
@@ -212,10 +213,29 @@ var relations = (function(){
             );
         }
 
+        handleCheckboxClick(e) {
+            var $el = ReactDOM.findDOMNode(this);
+            var $mdlSwitch = $($el).find(".mdl-js-switch")[0];
+            
+            e.preventDefault();
+            this.handleCheckboxChange(this.state);
+
+            if (this.state.field.is_deleted === true) {
+                $mdlSwitch.MaterialSwitch.off();
+                return;
+            }
+            $mdlSwitch.MaterialSwitch.on();
+        }
+
         handleCheckboxChange(obj) {
             obj.field.relation_type = "human";
             obj.field.is_deleted = !obj.field.is_deleted;
+            
             updateOrCreate(obj.tableLeft, obj.tableRight, obj.field);
+            
+            this.setState(prevState => ({
+                field : obj.field
+            }));
         }
 
         render() {
@@ -230,12 +250,14 @@ var relations = (function(){
                         {className: "mdl-list__item-secondary-action"},
                         React.createElement("label",
                             {className: "mdl-switch mdl-js-switch",
-                                "for": this.getFieldKey()},
+                                "for": this.getFieldKey(),
+                                onClick: this.handleCheckboxClick
+                            },
                             React.createElement("input", {type: 'checkbox',
                                 className: "mdl-switch__input",
                                 id: this.getFieldKey(),
                                 defaultChecked: !this.state.field.is_deleted,
-                                onChange: this.handleCheckboxChange}),
+                            }),
                             React.createElement("span", {className: "mdl-switch__label"}),
                         )
                     ),
