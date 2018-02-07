@@ -281,6 +281,22 @@ def table(name):
                     mimetype="application/json")
 
 
+@APP.route("/search/", methods=["POST"])
+def text_search():
+
+    query = request.get_json()
+
+    req = {"action": "search",
+           "query": query.get("query")}
+    print req
+
+    response, status = process(req, request.authorization)
+
+    return Response(response,
+                    status=status,
+                    mimetype="application/json")
+
+
 @APP.route("/tables", methods=["GET"])
 def tables():
 
