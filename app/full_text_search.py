@@ -84,9 +84,38 @@ def search_relation(model, query):
             .all())
 
     try:
-        docs["res"] = compute_relations(model.dot_relations(),
-                                              rels,
-                                              remove_deleted=True)
+        relations = {}
+
+        for r in rels:
+
+            key = r.tablel.name
+            tab = r.tablel
+
+            if relations.has_key(r.tabler.name):
+                key = r.tabler.name
+                tab = r.tabler
+
+            if relations.has_key(key) is True:
+                user = r.user
+                if user is None:
+                    user = User(username="lbdbot",
+                                first_name="lbDbot",
+                                last_name="lbDbot",
+                                email="lbdbot@lbdbot.com")
+
+                obj = {"description": description_or_query(sess,
+                                                           tab,
+                                                           "tag",
+                                                           query),
+                       "link": [r.tablel.name, r.tabler.name],
+                       "record_date": r.record_date.strftime('%Y-%m-%d %H:%M:%S'),
+                       "user": user.json()}
+
+                relations[key] = obj
+            else:
+                relations.get(key)['link'] = list(set(relations.get(key)['link']) |
+                                                  set([r.tablel.name, r.tabler.name]))
+        docs["res"] = relations.values()
     finally:
         sess.close()
 
@@ -131,7 +160,9 @@ def search_meta(model, query):
                                                                "tag",
                                                                query),
                            "link": [r.tablel.name, r.tabler.name],
-                           "user": meta.user.json()}
+                           "user": meta.user.json(),
+                           "record_date": meta.record_date.strftime('%Y-%m-%d %H:%M:%S')
+                           }
 
                     if relations.get(key) is None:
                         relations[key] = obj
@@ -175,7 +206,9 @@ def search_meta(model, query):
 
                     obj = {"description":"%s: %s" % (meta.description, description),
                            "link": [r.meta_table.name for r in res ],
-                           "user": user.json()}
+                           "user": user.json(),
+                           "record_date": meta.record_date.strftime('%Y-%m-%d %H:%M:%S')
+                           }
 
                     if relations.get(key) is None:
                         relations[key] = obj
@@ -198,7 +231,9 @@ def search_meta(model, query):
                     if len(tabs) > 0:
                         obj = {"description": "%s: %s" % (meta.description, description),
                                "link": list(tabs),
-                               "user": user.json()}
+                               "user": user.json(),
+                               "record_date": meta.record_date.strftime('%Y-%m-%d %H:%M:%S')
+                               }
 
                         if relations.get(key) is None:
                             relations[key] = obj
