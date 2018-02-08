@@ -11,6 +11,11 @@
 {% include "home.html" %}
 </div>
 
+<!-- PRERELATION -->
+<div class="wide" data-page="prerelation">
+{% include "prerelation.html" %}
+</div>
+
 <!-- LOOKUP PAGE -->
 <div class="wide" data-page="relation">
 {% include "relation.html" %}
@@ -29,8 +34,38 @@
 {% endblock %}
 ose a utility bill
 {% block js %}
+<script id="tmpl-value" type="x-tmpl-mustche">
+    <li class=""> 
+        <div>  
+            <a href="/#<% tag %>/<% value %>" class="no-decoration label"> 
+                 <% value %>
+            </a> 
+        </div>
+        <div>
+        <a href="/#<% tag %>/<% value %>" class="no-decoration link"> 
+             <% url %>/#<% tag %>/<% value %> 
+        </a> 
+        </div>
+        <div>
+            <%#description%>
+                <span class="long-text">
+                    <% description %>
+                </span>
+            <%/description%>
+        </div>
+        <div>
+            <%#user%>
+                <span class="creator">
+                    Created by <% user %> on <% time %>
+                </span>
+            <%/user%>
+        </div>
+    </li>
+</script>
+
 <script src="{{ url_for('static', filename='js/relations.js') }}"></script>
 <script src="{{ url_for('static', filename='js/page.home.js') }}"></script>
+<script src="{{ url_for('static', filename='js/page.prerelation.js') }}"></script>
 <script src="{{ url_for('static', filename='js/page.relation.js') }}"></script>
 <script src="{{ url_for('static', filename='js/page.login.js') }}"></script>
 <script src="{{ url_for('static', filename='js/page.table.js') }}"></script>

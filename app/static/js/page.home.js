@@ -2,423 +2,161 @@
 
 var page = (function(page){
 
-    var $scrollTopBtn = $("#scroll-top");
-    var $container = $("#home-page-container");
-    
-    var $statisticContainer = $(".statistic-container");
-    var $statistic = $(".statistic");
+    var $searchContainer = $('#home-page-container > .searcher');
+    var $form = $searchContainer.find("form");
+    var $input = $form.find("#text-search");
+
+    var $resultContainer = $("#home-page-container > .results");
+    var $container = $resultContainer.find('.container');
+    var $results = $resultContainer.find("#results");
+    var $list = $results.find("ul");
+    var $stat = $results.find(".result-statistic");
 
 
-	class ChipsElement extends React.Component {
-		constructor(props) {
-			super(props);
-			this.state = {data: this.props.selected || []};
+    // TEMPLATES
+    var tmplValue = $("#tmpl-value").html();
 
-			this.handleClick = this.handleClick.bind(this);
-		}
-
-		handleClick(e) {
-			var value = e.target.dataset.value;
-			var list = this.state.data;
-			var i = list.indexOf(value);
-
-			if(i === -1){
-				return;
-			}
-
-			list.splice(i, 1);
-			this.setState({data: list});
-			this.props.selectedChanged(list);
-		}
-
-		componentDidMount() {
-			var $el = ReactDOM.findDOMNode(this);
-			componentHandler.upgradeElements($el);
-		}
-
-		render () {
-			return (
-				this.state.data.length > 0 ? 
-				(React.createElement(
-					"div",
-					{className: "chips-container"},
-					this.state.data.map(value =>
-						(React.createElement(
-							"span",
-							{className:"mdl-chip mdl-chip--deletable",
-                             key: value + "_chip"},
-							React.createElement(
-								"a", 
-								{className:"mdl-chip__text no-decoration",
-                                 href:"/#table/" + value},
-								value),
-							React.createElement(
-								"button",
-								{className: "mdl-chip__action", 
-									onClick: this.handleClick},
-								React.createElement(
-									"i", 
-									{className: "material-icons", 
-										"data-value": value},
-									"cancel"))))),
-					React.createElement(
-						"a", 
-						{href : "/#relation/" + this.state.data.join('/'),
-							className: "mdl-button mdl-js-button mdl-color-text--indigo"},
-						"View relations"))) : React.createElement("div", null)
-			);
-		}
-	}
-
-
-	class SelectableList extends React.Component {
-		constructor(props) {
-			super(props);
-			this.state = {dataSource: this.props.dataSource, 
-				selected: this.props.selected || []};
-
-			this.handleChange = this.handleChange.bind(this);
-		}
-
-
-		handleChange(e) {
-			this.props.updateSelection(e.target.dataset.value);
-		}
-
-		componentDidMount() {
-			var $el = ReactDOM.findDOMNode(this);
-			componentHandler.upgradeElements($el);
-		}
-
-		render() {
-			return (
-				React.createElement(
-					"ul",
-					{className: "wide mdl-list no-margin"},
-					this.state.dataSource.map(
-						value => 
-						React.createElement(
-							"li", 
-							{key: value, 
-								className: "mdl-list__item"},
-							React.createElement(
-								"span", 
-								{className:"mdl-list__item-primary-content"}, 
-								value),
-							React.createElement(
-								"span", 
-								{className:"mdl-list__item-secondary-action"},
-								React.createElement(
-									"label",
-									{className: "mdl-switch mdl-js-switch", 
-										for: value},
-									React.createElement(
-										"input",
-										(this.state.selected.indexOf(value) === -1 ?
-											{type: "checkbox",
-												className:"mdl-switch__input",
-												id: value,
-												"data-value": value,
-												onChange: this.handleChange}:
-											{type: "checkbox",
-												className:"mdl-switch__input",
-												id: value,
-												"data-value": value,
-												onChange: this.handleChange,
-												checked: true})
-									)
-								)
-							)
-						)
-					)
-				)
-			);
-		}
-	}
-
-	class PanelComponent extends React.Component {
-		constructor(props) {
-			super(props);
-			this.state = {showPanel: false, 
-				dataSource: this.props.dataSource, 
-				selected: this.props.selected || []};
-
-			this.handleClick = this.handleClick.bind(this);
-			this.updateSelection = this.updateSelection.bind(this);
-		}
-
-		handleClick(e) {
-			e.preventDefault();
-			this.setState({ showPanel: !this.state.showPanel});
-		}
-
-		updateSelection(value) {
-			this.props.updateSelection(value);
-		}
-
-		componentDidMount() {
-			var $el = ReactDOM.findDOMNode(this);
-			componentHandler.upgradeElements($el);
-		}
-
-		render () {
-			return (
-				React.createElement(
-					"div", 
-					null,
-					React.createElement(
-						"button",
-						{className: "accordion", 
-							onClick:this.handleClick},
-						"View all tables",
-						React.createElement(
-							"i",
-							{className:"material-icons"},
-							("keyboard_arrow_" + (this.state.showPanel ? "up": "down")))),
-					React.createElement(
-						"div", 
-						{className: "content " + (this.state.showPanel ? "active": "" )},
-						(this.state.showPanel ? 
-							React.createElement(
-								"div", 
-								{className: "panel"},
-								React.createElement(
-									SelectableList,
-									{dataSource: this.state.dataSource,
-										selected: this.state.selected,
-										updateSelection: this.updateSelection})) : 
-							null)))
-			);
-		}
-	}
-
-
-	class InputField extends React.Component {
-		constructor(props) {
-			super(props);
-			this.state = {dataSource: this.props.dataSource};
-		}
-
-		componentDidMount() {
-			var self = this;  
-			var $el = ReactDOM.findDOMNode(self);
-			var $typeahead = $($el).find('input');
-
-			componentHandler.upgradeElements($el);
-
-            $typeahead.typeahead({
-                hint: true,
-                highlight: true,
-                minLength: 1
-            },
-            {
-                name: 'tables',
-                source: substringMatcher(self.state.dataSource)
-            });
-
-			$typeahead.on('typeahead:selected', function(event, selection) {
-				self.props.onSelected(selection);
-				$typeahead.typeahead('val', '')
-					.closest(".is-dirty")
-					.removeClass('is-dirty');
-			});
-		}
-
-		render() {
-			return (
-				React.createElement(
-					"div",
-					{className: "no-padding-bottom mdl-textfield mdl-js-textfield"},
-					React.createElement(
-						"input",
-						{className: "mdl-textfield__input wide",
-							id: "search-field",
-							autofocus:true}),
-					React.createElement(
-						"label",
-						{className:"mdl-textfield__label", 
-							for:"search-field"},
-						React.createElement(
-							"i", 
-							{className: "material-icons"},
-							"search"),
-						"Type here to select tables..."))
-			);
-		}
-
-	}
-
-	class AutoCompleter extends React.Component {
-
-		constructor(props) {
-			super(props);
-
-			this.state = {dataSource: this.props.dataSource, selected: []};
-
-			this.handleSelected = this.handleSelected.bind(this);
-			this.handleChipsChange = this.handleChipsChange.bind(this);
-			this.updateSelection = this.updateSelection.bind(this);
-		}
-
-		componentDidMount() {
-			var $el = ReactDOM.findDOMNode(this);
-			componentHandler.upgradeElements($el);
-		}
-
-		updateSelection (value) {
-			var list = this.state.selected;
-			var i = list.indexOf(value);
-
-			if(i === -1) {
-				list.push(value);
-			} else {
-				list.splice(i, 1);
-			}
-
-			this.setState({selected: list});
-		}
-
-		handleChipsChange(selectList) {
-			this.setState({selected: selectList || []});
-		}
-
-		handleSelected(selection) {
-			var list = this.state.selected;
-			var i = list.indexOf(selection);
-
-			if(i === -1){
-				list.push(selection);
-				this.setState({selected: list});
-			}
-		}
-
-		render() {
-			return (
-				React.createElement(
-					"div",
-					null,
-					React.createElement(
-						"div",
-						{className: "mdl-card mdl-card mdl-shadow--2dp"}, 
-						React.createElement(
-							"div",
-							{className: "wide no-padding  pad-left-1 mdl-card__supporting-text"},
-							React.createElement(
-								InputField,
-								{dataSource: this.state.dataSource,
-									onSelected: this.handleSelected}),
-							React.createElement(
-								ChipsElement, 
-								{selected: this.state.selected,
-									selectedChanged: this.handleChipsChange})),
-						React.createElement(
-							"div", 
-							{className:"mdl-card__actions no-padding mdl-card--border"},
-							React.createElement(
-								PanelComponent,
-								{dataSource: this.state.dataSource,
-									selected: this.state.selected,
-									updateSelection: this.updateSelection}))))
-			);
-		}
-	}
+    Mustache.tags = [ '<%', '%>' ];
+    Mustache.escape = function(value) { return value; };
+    Mustache.parse(tmplValue);
 
 
     page.home = {
 
         init: function() {
 
-            // handle scroll top button
-            $("main").scroll(scrollFunction);
-            $scrollTopBtn.click(function(){
-                $("main").animate({scrollTop: 0}, 200);
+            $searchContainer.show();
+            $list.empty();
+
+            $form.on('submit', function(e){
+                e.preventDefault();
+                cache.getInstance().add("search", $input.val());
+                page.home.render($input.val());
             });
 
-            return this;
         },
 
         render: function() {
-
-            
-            // Load table list
-            if(!cache.getInstance().hasData("tables")) {
-                server.getTableList()
-                    .done(function(data){
-                        //Todo common response handler
-                        if(data.status != true) {
-                            console.error(data.response.message)
-                            return;
-                        }
-                        ReactDOM.render(
-                            React.createElement(AutoCompleter, {dataSource: data.response.data}), 
-                            $container[0]);
-
-                        cache.getInstance().add("tables", data.response.data);
-                    });
+           
+            if (!cache.getInstance().get("search")) {
+                $searchContainer.show();
+                $resultContainer.hide();
+                $list.empty();
+                $form[0].reset();
+                return;
             }
             
+            $list.empty();
+            $searchContainer.hide();
+            $resultContainer.show();
             
-            // Load statistics information
-            if(!cache.getInstance().hasData("statistics")) {
-                server.getStatistics()
-                    .done(function(data){
-                        //TODO common response handler
-                        if(data.status != true) {
-                            console.error(data.response.message)
-                            return;
-                        }
+            server.search(cache.getInstance().get("search"))
+                .done(function(data){
+                    if( data.status === false) {
+                        snackbar.show(data.response.message);
+                        return;
+                    }
 
-                        var msg = "Loaded ";
-                        msg += data.response.data.tables_number;
-                        msg += " tables in " + data.elapsed_time;
-                        
-                        $statistic.text(msg + ".");
-                        cache.getInstance().add("statistics", data.response.data);
-                    })
-                    .always(loader.start({container: $statisticContainer,
-                        element: $statistic}));
-            }
+                    var query = $input.val()
+                    var counter = 0;
 
-            return this;
+                    counter += data.response.data.columns.length;
+                    counter += data.response.data.relations.length;
+                    counter += data.response.data.tables.length;
+
+                    $stat.text("About " + counter +
+                        " results found in (" + data.elapsed_time + ").");
+
+                    var $relations = [];
+                    var $tables = [];
+                    var $columns = [];
+
+                    renderer(
+                        data.response.data.relations,
+                        $relations,
+                        "relation",
+                        query,
+                        buildRender
+                    );
+
+                    renderer(
+                        data.response.data.tables,
+                        $tables,
+                        "table",
+                        query,
+                        buildRender
+                    );
+
+                    renderer(
+                        data.response.data.columns,
+                        $columns,
+                        "column",
+                        query,
+                        buildRender
+                    );
+
+                    $list.append($tables);
+                    $list.append($relations);
+                    $list.append($columns);
+
+                })
+                .always(loader.start({container: $container, element: $results}));
+
         }
     };
 
-    function scrollFunction() {
-        if (document.querySelector("main").scrollTop > 20 ) {
-            $scrollTopBtn.show();
-        } else {
-            $scrollTopBtn.hide();
-        }
-    }
-
-
-    function substringMatcher (dataSource) {
-        return function findMatches(q, callback) {
-            var matches, substringRegex;
-
-            // an array that will be populated with substring matches
-            matches = [];
-
-            // regex used to determine if a string contains the substring `q`
-            var substrRegex = new RegExp(q, 'i');
-
-            // iterate through the pool of strings and for any string that
-            // contains the substring `q`, add it to the `matches` array
-            $.each(dataSource, function(i, str) {
-                if (substrRegex.test(str)) {
-                    matches.push(str);
-                }
-            });
-
-            matches.sort(function(a, b){
-                return a.length - b.length;
-            });
-
-            callback(matches);
-        };
-    }
-
-
     return page;
+
+
+    function renderer(data, $list, tag, query, callback) {
+        data.forEach(function(obj){
+            var html = callback(obj, query, tag);
+            if(html.length !== 0) {
+                $list.push(html);
+            }
+        });
+    }
+
+    function buildRender(obj, query, tag) {
+
+        switch(typeof(obj)) {
+            case "string":
+                obj = {value: obj};
+                break;
+            default:
+                obj = {
+                    value: buildValue(obj.table || obj.link),
+                    description: buildDesc(obj.description, query),
+                    user: obj.user.lastName + " " + obj.user.firstName,
+                    time: obj.record_date
+                };
+                break;
+        }
+
+        obj["tag"] = tag;
+        obj["url"] = location.origin;
+
+        return Mustache.render(tmplValue, obj); 
+    }
+
+    function buildValue(value) {
+        if (typeof(value) === "string") {
+            return value;
+        }
+        return (value || []).join("/");
+    }
+
+    function buildDesc(str, query) {
+        var reg = new RegExp(query, 'gi');
+        var maxChar = 200;
+
+        if (str.length > maxChar) {
+            str = (str.substring(0, maxChar) + "...");
+        }
+
+        return str.replace(reg, function(o){
+            return "<b>"+ o +"</b>";
+        });
+    }
 
 })(page || {});

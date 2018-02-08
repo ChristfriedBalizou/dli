@@ -84,6 +84,16 @@ var server = (function($){
                 "dataType": "json",
                 "data": JSON.stringify(data)
             });
+        },
+
+        search: function(query) {
+            return $.ajax({
+                "url": buildUrl("search/"),
+                "method": "POST",
+                "data": JSON.stringify({query: query}), 
+                "contentType": "application/json; charset=utf-8",
+                "dataType": "json",
+            });
         }
     
     };
