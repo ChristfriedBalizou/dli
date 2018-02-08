@@ -140,13 +140,9 @@ def search_meta(model, query):
                                                           set([r.tablel.name, r.tabler.name]))
 
             if meta.meta_type == "description":
-                res = (sess.query(TableModel)
-                       .filter(func.lower(TableModel.name) == query.lower())
-                       .all())
-                for r in res:
-                    obj = r.json()
-                    if obj in table_list:
-                        continue
+                obj = meta.json()
+
+                if obj not in table_list:
                     table_list.append(obj)
 
             if meta.meta_type in ["tag", "other"]:
@@ -296,7 +292,7 @@ def query_search(query, directory):
 
 if __name__ == '__main__':
 
-    args = sys.argv[:1]
+    args = sys.argv[1:]
 
     try:
         print json.dumps(query_search(*args))
