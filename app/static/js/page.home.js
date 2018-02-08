@@ -16,7 +16,8 @@ var page = (function(page){
     // TEMPLATES
     var tmplValue = $("#tmpl-value").html();
 
-    Mustache.tags = [ '<%', '%>' ]; 
+    Mustache.tags = [ '<%', '%>' ];
+    Mustache.escape = function(value) { return value; };
     Mustache.parse(tmplValue);
 
 
@@ -150,11 +151,12 @@ var page = (function(page){
         var maxChar = 200;
 
         if (str.length > maxChar) {
-            return (str.substring(0, maxChar) + "...").replace(reg, function(o){
-                return "<b>"+ o +"</b>";
-            });
+            str = (str.substring(0, maxChar) + "...");
         }
-        return str;
+
+        return str.replace(reg, function(o){
+            return "<b>"+ o +"</b>";
+        });
     }
 
 })(page || {});
