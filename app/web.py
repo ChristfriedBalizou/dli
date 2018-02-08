@@ -40,7 +40,6 @@ def elapsed_time(func):
         now = time.time()
         result = func(*args, **kwargs)
         elapsed = "{}s".format(time.time() - now)
-        logging.info(elapsed)
         return result + (elapsed,)
 
     return run
@@ -273,6 +272,21 @@ def table(name):
 
     req = {"action": "table",
             "name": name }
+
+    response, status = process(req, request.authorization)
+
+    return Response(response,
+                    status=status,
+                    mimetype="application/json")
+
+
+@APP.route("/search/", methods=["POST"])
+def text_search():
+
+    query = request.get_json()
+
+    req = {"action": "search",
+           "query": query.get("query")}
 
     response, status = process(req, request.authorization)
 

@@ -467,7 +467,7 @@ def create_or_update_metadata(database,
         if meta_type == "description":
             meta =  get_or_create(sess,
                                   Meta,
-                                  meta_table=entity,
+                                  meta_type=meta_type,
                                   **wildcard
                               )
             meta.description = req.get("description")
