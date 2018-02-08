@@ -40,7 +40,6 @@ def elapsed_time(func):
         now = time.time()
         result = func(*args, **kwargs)
         elapsed = "{}s".format(time.time() - now)
-        logging.info(elapsed)
         return result + (elapsed,)
 
     return run
