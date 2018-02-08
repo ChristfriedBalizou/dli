@@ -288,7 +288,6 @@ def text_search():
 
     req = {"action": "search",
            "query": query.get("query")}
-    print req
 
     response, status = process(req, request.authorization)
 
