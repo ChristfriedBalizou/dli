@@ -162,25 +162,18 @@ def remove_equal_relations(to_keep, add_maybe):
     return out
 
 
-def tables_descriptions(database, req, filename, directory):
+def draw_dot(database, req, filename, directory):
     response = None
     message = None
 
     try:
-        model = modelize(directory=database,
-                         relation_criterion="^REC",
-                         draw_relations=True,
-                         table_list=req.get("tables"))
-
         new_filename = extension(filename, 'png')
         file_path = os.path.join(directory, new_filename)
 
-        docs = model.dot()
-        relations = compute_relations(model.dot_relations())
         draw(file_path,
              'dot',
-             docs=docs,
-             relations=relations,
+             docs=req.get("docs"),
+             relations=req.get("relations"),
              decoration=req.get("decoration"),
              show_columns=req.get("show_columns"),
              hdel_color="#BDBDBD",
@@ -191,7 +184,29 @@ def tables_descriptions(database, req, filename, directory):
              bgcolor="#EEEEEE",
              table_bgcolor="#3F51B5")
 
-        response = {"filename": extension(filename, 'png'),
+        response = {"filename": extension(filename, 'png')}
+    except Exception as e:
+        message = str(e)
+        logging.error(e)
+
+    return response, message
+    pass
+
+
+def tables_descriptions(database, req, filename, directory):
+    response = None
+    message = None
+
+    try:
+        model = modelize(directory=database,
+                         relation_criterion="^REC",
+                         draw_relations=True,
+                         table_list=req.get("tables"))
+
+        docs = model.dot()
+        relations = compute_relations(model.dot_relations())
+
+        response = {"docs": model.dot(),
                     "relations": list(relations)}
     except Exception as e:
         message = str(e)
@@ -515,6 +530,7 @@ def text_search(database, req, filename, directory):
 func = {"listTables": list_table,
         "statistics": statistics,
         "tables": tables_descriptions,
+        "draw_dot": draw_dot,
         "relation": relation,
         "columns": get_table_columns,
         "auth_login": login,

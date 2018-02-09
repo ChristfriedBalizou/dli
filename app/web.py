@@ -20,6 +20,7 @@ import os
 import time
 import logging
 import struct
+import copy
 
 import argparse
 
@@ -71,27 +72,30 @@ def wait_response(filename, counter=20, speed=0.5):
 @elapsed_time
 def run_request(obj):
 
-    reqfile = None
     action = obj.get("action")
 
-    if action != "tables":
-        return func[action](APP.config.get("DATABASE_DIR"),
-                            obj,
-                            None,
-                            None)
+    response, message = func[action](APP.config.get("DATABASE_DIR"),
+                                     obj,
+                                     None,
+                                     None)
 
+    if action != "tables":
+        return response, message
+
+    # If it's tables request ask to pre-draw graph
     with NamedTemporaryFile(mode='w+b',
                             dir=DIRECTORY,
                             prefix="libDWeb",
                             suffix=".req",
                             delete=False) as writer:
-        reqfile = writer.name
-        json.dump(obj, writer)
+        doc_req = copy.deepcopy(obj)
+        doc_req["action"] = "draw_dot"
 
-    resfile = extension(reqfile, 'res')
+        doc_req.update(response)
+        json.dump(doc_req, writer)
+        response["filename"] = extension(os.path.basename(writer.name), "png")
 
-    logging.info("Sending request file %s" % os.path.basename(reqfile))
-    return resfile, wait_response(resfile, speed=0.5)
+    return response, message
 
 
 def get_image_info(data):
@@ -140,14 +144,11 @@ def process(req, authorization=None):
             "password": authorization.password
             }})
 
-    filename, status, elapsed = run_request(req)
+    data, message, elapsed = run_request(req)
 
-    if req.get('action') != 'tables':
-        docs["data"] = filename
-        docs["message"] = status
-        status = True
-    else:
-        docs = response_from_file(filename, status)
+    docs["data"] = data
+    docs["message"] = message
+    status = True
 
     if docs["message"] is not None:
         status = False
