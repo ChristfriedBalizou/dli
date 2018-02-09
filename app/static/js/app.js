@@ -5,6 +5,7 @@ $(function(){
     // ENDPOINTS
     var endpoint = {
         "home": page.home.render,
+        "search": page.search.render,
         "prerelation": page.prerelation.render,
         "relation": page.relation.render,
         "login": page.login.render,
@@ -19,6 +20,7 @@ $(function(){
     // INITIALIZE PAGES
     page.login.init();
     page.home.init();
+    page.search.init();
     page.prerelation.init();
     page.relation.init();
     page.table.init();

@@ -11,6 +11,11 @@
 {% include "home.html" %}
 </div>
 
+<!-- SEARCH -->
+<div class="wide" data-page="search">
+{% include "search.html" %}
+</div>
+
 <!-- PRERELATION -->
 <div class="wide" data-page="prerelation">
 {% include "prerelation.html" %}
@@ -65,6 +70,7 @@ ose a utility bill
 
 <script src="{{ url_for('static', filename='js/relations.js') }}"></script>
 <script src="{{ url_for('static', filename='js/page.home.js') }}"></script>
+<script src="{{ url_for('static', filename='js/page.search.js') }}"></script>
 <script src="{{ url_for('static', filename='js/page.prerelation.js') }}"></script>
 <script src="{{ url_for('static', filename='js/page.relation.js') }}"></script>
 <script src="{{ url_for('static', filename='js/page.login.js') }}"></script>
