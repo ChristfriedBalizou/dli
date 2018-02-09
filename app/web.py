@@ -2,7 +2,8 @@
 web.py
 '''
 
-from defs import func
+from app.defs import func
+from auth.auth import Auth
 
 from flask import Flask
 from flask import Response
@@ -33,6 +34,7 @@ DIRECTORY = os.path.join(CURRENT_DIRECTORY, '..', 'share')
 APP = Flask(__name__)
 APP.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 DELISTED = ("auth_login", "auth_logout")
+authenticator = Auth.Instance()
 
 
 def elapsed_time(func):
@@ -44,6 +46,16 @@ def elapsed_time(func):
         return result + (elapsed,)
 
     return run
+
+
+def requires_auth(username, password):
+
+        ok, _ = authenticator.check_authentication(username, password)
+
+        if ok is False:
+            return ok, "Wrong username or password"
+
+        return ok, None
 
 
 def extension(filename, ext):
@@ -132,6 +144,7 @@ def response_from_file(filename, status):
 def process(req, authorization=None):
 
     docs = {"data" : None, "message": None}
+    ok = True
 
 
     if not authorization and req.get("action") not in DELISTED:
@@ -144,10 +157,14 @@ def process(req, authorization=None):
             "password": authorization.password
             }})
 
-    data, message, elapsed = run_request(req)
+        # try to authenticate user
+        ok, msg = requires_auth(authorization.username, authorization.password)
+
+    if ok is True:
+        data, msg, elapsed = run_request(req)
 
     docs["data"] = data
-    docs["message"] = message
+    docs["message"] = msg
     status = True
 
     if docs["message"] is not None:
