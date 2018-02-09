@@ -199,16 +199,18 @@ var relations = (function(){
             }
 
             return (
-                React.createElement(
-                    'a',
-                    {className: "no-decoration", href: "/#column/" + a},
-                    a
-                ),
-                " - ",
-                React.createElement(
-                    'a',
-                    {className: "no-decoration", href: "/#column/" + b},
-                    b
+                React.createElement('div', null,
+                    React.createElement(
+                        'a',
+                        {className: "no-decoration", href: "/#column/" + a},
+                        a
+                    ),
+                    " - ",
+                    React.createElement(
+                        'a',
+                        {className: "no-decoration", href: "/#column/" + b},
+                        b
+                    )
                 )
             );
         }
