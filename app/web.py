@@ -9,13 +9,9 @@ from flask import Flask
 from flask import Response
 from flask import render_template
 from flask import request
-from flask import redirect, url_for
-from flask import make_response
 
 from tempfile import NamedTemporaryFile
-from functools import wraps
 
-import base64
 import json
 import os
 import time
