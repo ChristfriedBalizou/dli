@@ -449,6 +449,68 @@ def get_metadata(database,
     return response, message
 
 
+def wall_of_fam(database, req, filename, directory):
+
+    response = None
+    message = None
+
+    try:
+        sess = DBsession()
+        meta_res = []
+        rel_res = []
+
+        metadatas = (sess.query(Meta)
+                         .order_by(Meta.record_date.desc())
+                         .limit(20)
+                         .all())
+
+        relations = (sess.query(RelationModel)
+                         .order_by(RelationModel.record_date.desc())
+                         .limit(15)
+                         .all())
+
+        for meta in metadatas:
+            if meta.user is None:
+                continue
+
+            if meta.meta_type == "description":
+                description = "Add/Update a %s metadata" %  meta.meta_type
+            else:
+                description = "Add/Update %s %s metadata" %  (meta.meta_type, meta.description)
+
+            if meta.meta_table:
+                description = "%s on table %s" % (description, meta.meta_table.name)
+
+            if meta.meta_column:
+                description = "%s on column %s" % (description, meta.meta_column.name)
+
+            meta_res.append({
+                "user": meta.user.json(),
+                "record_date": meta.record_date.strftime("%Y-%M-%d %H:%M:%S"),
+                "description": description
+            })
+
+        for rel in relations:
+            if rel.user is None:
+                continue
+
+            description = "Add/Update a relation between"
+            description = "%s %s and %s" % (description, rel.tablel.name, rel.tabler.name)
+
+            rel_res.append({
+                "user": rel.user.json(),
+                "record_date": rel.record_date.strftime("%Y-%M-%d %H:%M:%S"),
+                "description": description
+            })
+
+        response = meta_res + rel_res
+    except Exception as e:
+        message = str(e)
+        logging.error(e)
+
+    return response, message
+
+
 def create_or_update_metadata(database,
                               req,
                               filename,
@@ -537,5 +599,6 @@ func = {"listTables": list_table,
         "auth_logout": logout,
         "metadata": get_metadata,
         "create_or_update_metadata": create_or_update_metadata,
+        "wall_of_fam": wall_of_fam,
         "search": text_search
         }

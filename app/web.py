@@ -348,6 +348,16 @@ def relation(table_left, table_right):
                     status=status,
                     mimetype="application/json")
 
+@APP.route("/fam", methods=["GET"])
+def wall_of_fam():
+
+    req = {"action": "wall_of_fam"}
+
+    response, status = process(req, request.authorization)
+
+    return Response(response,
+                    status=status,
+                    mimetype="application/json")
 
 def run(options):
 

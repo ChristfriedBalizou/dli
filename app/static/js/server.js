@@ -94,6 +94,10 @@ var server = (function($){
                 "contentType": "application/json; charset=utf-8",
                 "dataType": "json",
             });
+        },
+        
+        getFam: function() {
+            return $.get(buildUrl("fam"));
         }
     
     };

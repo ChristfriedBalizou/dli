@@ -469,6 +469,23 @@ a.no-decoration {
 }
 
 /* For home page */
+.fams-grid .mdl-card {
+    position: relative;
+    width: 100%;
+    min-height: 10em;
+    max-height: 10em;
+    padding: 1em;
+    color: #616161;
+}
+
+.fams-grid .mdl-card .user-detail {
+    color: #bbb;
+    font-size: 1.2em;
+}
+
+.fams-grid .mdl-card .user-detail small {
+    font-size: .5em;
+}
 
 #search-form {
     height: 61%;

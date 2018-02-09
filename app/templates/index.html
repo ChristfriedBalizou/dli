@@ -68,6 +68,20 @@ ose a utility bill
     </li>
 </script>
 
+<script id="tmpl-fams" type="x-tmpl-mustache">
+    <div class="mdl-cell mdl-cell--2-col">
+        <div class="mdl-card mdl-shadow--2dp no-margin">
+            <span class="user-detail">
+                <% user.firstName %> <% user.lastName %><br/>
+                <small><% record_date %></small>
+            </span><br>
+            <div>
+                <i><% description %><i>
+            </div>
+        </div>
+    </div>
+</script>
+
 <script src="{{ url_for('static', filename='js/relations.js') }}"></script>
 <script src="{{ url_for('static', filename='js/page.home.js') }}"></script>
 <script src="{{ url_for('static', filename='js/page.search.js') }}"></script>

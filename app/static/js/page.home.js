@@ -4,9 +4,12 @@ var page = (function(page){
 
     var $form = $("#search-form");
     var $input = $form.find("#text-search");
+    var $container = $("#home-page-container");
+    var $box = $(".fam-box");
+    var $element = $(".fams-grid");
 
     // TEMPLATES
-    var tmplValue = $("#tmpl-value").html();
+    var tmplValue = $("#tmpl-fams").html();
 
     Mustache.tags = [ '<%', '%>' ];
     Mustache.escape = function(value) { return value; };
@@ -23,10 +26,28 @@ var page = (function(page){
         },
 
         render: function() {
+            $element.empty();
+
+            server.getFam().done(function(data){
+                if( data.status === false) {
+                    snackbar.show(data.response.message);
+                    return;
+                }
+
+                var $row = data.response.data.map(render);
+
+                $element.html($row);
+                
+            }).always(loader.start({container: $container, element: $box}));
         }
            
     };
 
     return page;
+
+
+    function render(obj) {
+        return Mustache.render(tmplValue, obj);
+    }
 
 })(page || {});
