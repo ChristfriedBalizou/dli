@@ -70,15 +70,20 @@ ose a utility bill
 
 <script id="tmpl-fams" type="x-tmpl-mustache">
     <div class="mdl-cell mdl-cell--6-col">
-        <div class="mdl-card mdl-shadow--2dp no-margin">
-            <span class="user-detail">
-                <% user.firstName %> <% user.lastName %><br/>
-                <small><% record_date %></small>
-            </span><br>
-            <div>
-                <i><% description %><i>
+        <a href="<% url %>" class="no-decoration">
+            <div class="mdl-card auto-height mdl-shadow--2dp no-margin">
+                <span class="user-detail">
+                    <% user %><br/>
+                </span><br>
+                <div>
+                    <i>Added/Updated <% type %> <% entity %>:<i><br>
+                    <br>
+                    <%#desc%>
+                    -   <%.%><br>
+                    <%/desc%>
+                </div>
             </div>
-        </div>
+        </a>
     </div>
 </script>
 

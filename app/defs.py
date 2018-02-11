@@ -456,8 +456,7 @@ def wall_of_fam(database, req, filename, directory):
 
     try:
         sess = DBsession()
-        meta_res = []
-        rel_res = []
+        res = {}
 
         metadatas = (sess.query(Meta)
                          .order_by(Meta.record_date.desc())
@@ -473,37 +472,59 @@ def wall_of_fam(database, req, filename, directory):
             if meta.user is None:
                 continue
 
-            if meta.meta_type == "description":
-                description = "Add/Update a %s metadata" %  meta.meta_type
-            else:
-                description = "Add/Update %s %s metadata" %  (meta.meta_type, meta.description)
+            entity = meta.meta_column
+            category = "column"
 
-            if meta.meta_table:
-                description = "%s on table %s" % (description, meta.meta_table.name)
+            if meta.meta_table is not None:
+                entity = meta.meta_table
+                category = "table"
 
-            if meta.meta_column:
-                description = "%s on column %s" % (description, meta.meta_column.name)
+            user = "%s %s" % (meta.user.first_name, meta.user.last_name)
 
-            meta_res.append({
-                "user": meta.user.json(),
-                "record_date": meta.record_date.strftime("%Y-%M-%d %H:%M:%S"),
-                "description": description
-            })
+            key = (user, entity, meta.meta_type,)
+
+            if res.has_key(key) is False:
+                user, obj, _ = key
+
+                res[key] = {
+                        "user": user,
+                        "type": meta.meta_type,
+                        "desc": [],
+                        "url": "/#%s/%s" % (category, obj.name),
+                        "entity": "on %s %s" % (category, obj.name)}
+
+            if meta.meta_type == "descrition":
+                continue
+
+            res[key]["desc"] = list(set(res[key]["desc"]) | set([meta.description]))
 
         for rel in relations:
             if rel.user is None:
                 continue
 
-            description = "Add/Update a relation between"
-            description = "%s %s and %s" % (description, rel.tablel.name, rel.tabler.name)
+            user = "%s %s" % (rel.user.first_name, rel.user.last_name)
+            key = (user, rel.tabler.name, rel.tablel.name,)
 
-            rel_res.append({
-                "user": rel.user.json(),
-                "record_date": rel.record_date.strftime("%Y-%M-%d %H:%M:%S"),
-                "description": description
-            })
+            if res.has_key(key) is False:
+                key = (user, rel.tablel.name, rel.tabler.name,)
 
-        response = meta_res + rel_res
+            if res.has_key(key) is False:
+                user, tabl, tabr = key
+                res[key] = {
+                        "user": user,
+                        "type": "relation",
+                        "desc": [],
+                        "url": "/#relation/%s/%s" % (tabl, tabr),
+                        "entity": "between %s and %s" % (tabl, tabr)}
+
+            column = rel.columnl.name
+
+            if column != rel.columnr.name:
+                column = "%s - %s" % (column, rel.columnr.name)
+
+            res[key]["desc"] = list(set(res[key]["desc"]) | set([column]))
+
+        response = res.values()
     except Exception as e:
         message = str(e)
         logging.error(e)
