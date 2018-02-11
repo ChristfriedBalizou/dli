@@ -469,6 +469,12 @@ a.no-decoration {
 }
 
 /* For home page */
+#home-page-container .title p > span {
+    color: #3F51B5;
+    font-size: 3em;
+    font-weight: bold;
+}
+
 .fams-grid .mdl-card {
     position: relative;
     width: 100%;
@@ -528,12 +534,6 @@ a.no-decoration {
 
 
 /* For search page */
-#search-page-container .title p > span {
-    color: #3F51B5;
-    font-size: 3em;
-    font-weight: bold;
-}
-
 #search-page-container .results ul > li {
     overflow: visible;
     height: auto !important;
