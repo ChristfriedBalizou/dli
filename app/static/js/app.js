@@ -9,6 +9,8 @@ $(function(){
         "prerelation": page.prerelation.render,
         "relation": page.relation.render,
         "login": page.login.render,
+        "forgot-password": page.forgotPassword.render,
+        "reset-password": page.resetPassword.render,
         "table": page.table.render,
         "column": page.column.render,
         "logout": function() {
@@ -19,6 +21,8 @@ $(function(){
 
     // INITIALIZE PAGES
     page.login.init();
+    page.forgotPassword.init();
+    page.resetPassword.init();
     page.home.init();
     page.search.init();
     page.prerelation.init();

@@ -4,6 +4,8 @@ var router = (function(session) {
 
     var path = {};
 
+    var delisted = ["login", "forgot-password"];
+
     return {
         init: function (endpoint) {
             path = $.extend(path, endpoint);
@@ -27,12 +29,13 @@ var router = (function(session) {
             var page = hash.splice(0, 1)
                            .pop();
 
-            if (!session.isLogged() && page !== "login") {
+            if (!session.isLogged() && (delisted.concat(["reset-password"]))
+                                        .indexOf(page) === -1) {
                 location.hash = "login";
                 return;
             }
 
-            if (session.isLogged() && page === "login") {
+            if (session.isLogged() && delisted.indexOf(page) !== -1) {
                 location.hash = "";
                 return;
             }

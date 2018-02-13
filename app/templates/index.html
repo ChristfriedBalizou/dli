@@ -6,6 +6,16 @@
 {% include "login.html" %}
 </div>
 
+<!-- FORGOT PASSWORD -->
+<div class="wide" data-page="forgot-password">
+{% include "forgot_password.html" %}
+</div>
+
+<!-- RESET PASSWORD -->
+<div class="wide" data-page="reset-password">
+{% include "reset_password.html" %}
+</div>
+
 <!-- HOME -->
 <div class="wide" data-page="home">
 {% include "home.html" %}
@@ -93,6 +103,8 @@ ose a utility bill
 <script src="{{ url_for('static', filename='js/page.prerelation.js') }}"></script>
 <script src="{{ url_for('static', filename='js/page.relation.js') }}"></script>
 <script src="{{ url_for('static', filename='js/page.login.js') }}"></script>
+<script src="{{ url_for('static', filename='js/page.forgot_password.js') }}"></script>
+<script src="{{ url_for('static', filename='js/page.reset_password.js') }}"></script>
 <script src="{{ url_for('static', filename='js/page.table.js') }}"></script>
 <script src="{{ url_for('static', filename='js/page.column.js') }}"></script>
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>

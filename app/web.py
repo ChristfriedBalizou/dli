@@ -5,12 +5,16 @@ web.py
 from app.defs import func
 from auth.auth import Auth
 
-from flask import Flask
+from flask import Flask, session
 from flask import Response
 from flask import render_template
 from flask import request
 
+from flask_session import Session
+
 from tempfile import NamedTemporaryFile
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 import json
 import os
@@ -18,6 +22,8 @@ import time
 import logging
 import struct
 import copy
+import uuid
+import smtplib
 
 import argparse
 
@@ -31,6 +37,41 @@ APP = Flask(__name__)
 APP.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 DELISTED = ("auth_login", "auth_logout")
 authenticator = Auth.Instance()
+
+
+def send_mail(token, email, sender="noreply-lbdi@amundi.com"):
+
+    msg = MIMEMultipart('alternative')
+    msg['Subject'] = "[lbDi Tool] Library DECALOG interface password reset link"
+    msg['From'] = sender
+    msg['to'] = email
+
+    link = "http://tst-clappdecalog:5555/#reset-password/%s" % token
+
+    html ="""\
+            <html>
+                <head></head>
+                <body>
+                    Copy and paste the following link in your <b>Google Chrome</b> or <b>Firefox</b> <br/>
+                    to reset you lbDi password<br>
+                    <a href="%s">%s</a> <br/><br/>
+
+                    Regards,<br/>
+                    lbDi - Library DECALOG interface
+                </body>
+            </html>
+    """ % (link, link)
+
+    msg.attach(MIMEText(html, 'html'))
+
+    email_server = APP.config.get("email_server")
+
+    if email_server is None:
+        email_server = 'localhost'
+
+    s = smtplib.SMTP(email_server)
+    s.sendmail(sender, email, msg.as_string())
+    s.quit()
 
 
 def elapsed_time(func):
@@ -348,6 +389,60 @@ def relation(table_left, table_right):
                     status=status,
                     mimetype="application/json")
 
+
+@APP.route("/forgot_password/<email>", methods=["GET"])
+def forgot_password(email):
+
+    response = {"status": True}
+
+    user = authenticator.get_user_by_email(email)
+
+    if user is None:
+        response["status"] = False
+    else:
+        token = uuid.uuid4().hex
+        session[token] = user
+        send_mail(token, email)
+
+    return Response(json.dumps(response, indent=4),
+                    status=200,
+                    mimetype="application/json")
+
+
+@APP.route("/reset_password/<email>/", methods=["POST"])
+def reset_password(email):
+
+    response = {"status": True}
+
+    obj = request.get_json()
+
+    status = authenticator.update_password(email, obj.get("newPassword"))
+
+    response["status"] = status
+
+    return Response(json.dumps(response, indent=4),
+                    status=200,
+                    mimetype="application/json")
+
+
+@APP.route("/user/<token>", methods=["GET"])
+def get_user_by_token(token):
+
+    response = {"data": None, "status": True}
+
+    response["data"] = session.get(token)
+
+    if session.get(token) is not None:
+        del session[token]
+
+    if response["data"] is None:
+        response["status"] = False
+
+    return Response(json.dumps(response, indent=4),
+                    status=200,
+                    mimetype="application/json")
+
+
 @APP.route("/fam", methods=["GET"])
 def wall_of_fam():
 
@@ -362,6 +457,13 @@ def wall_of_fam():
 def run(options):
 
     APP.config["DATABASE_DIR"] = os.path.expanduser(options.database)
+    APP.config["email_server"] = options.email_server
+    APP.secret_key = 'd35feb998e3647a4a665284078bd5c38'
+    APP.config['SESSION_TYPE'] = 'filesystem'
+
+    sess = Session()
+    sess.init_app(APP)
+
     APP.run(port=options.port, host=options.server, processes=5)
 
 
@@ -376,6 +478,11 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--server',
                         default='0.0.0.0',
                         help='Server IP address')
+
+    parser.add_argument('--server-email',
+                        default=None,
+                        dest="email_server",
+                        help='Host email server')
 
     parser.add_argument("-d", "--database",
                         required=True,

@@ -98,6 +98,24 @@ var server = (function($){
         
         getFam: function() {
             return $.get(buildUrl("fam"));
+        },
+
+        forgotPassword: function(email) {
+            return $.get(buildUrl("forgot_password", email));
+        },
+
+        getUserByToken: function(token) {
+            return $.get(buildUrl("user", token));
+        },
+
+        resetPassword: function(email, auth) {
+            return $.ajax({
+                "url": buildUrl("reset_password", email) + "/",
+                "method": "POST",
+                "contentType": "application/json; charset=utf-8",
+                "dataType": "json",
+                "data": JSON.stringify(auth)
+            });
         }
     
     };

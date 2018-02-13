@@ -127,3 +127,30 @@ class Auth(object):
             return True, user
 
         return False, None
+
+
+    def get_user_by_email(self, email):
+        sess = DBsession()
+
+        user = (sess.query(User)
+                    .filter_by(email=email)
+                    .first())
+        if user is None:
+            return None
+
+        return user.json()
+
+
+    def update_password(self, email, password):
+        sess = DBsession()
+
+        user = (sess.query(User)
+                    .filter_by(email=email)
+                    .first())
+
+        if user is None:
+            return False
+
+        user.has_password(password)
+        sess.commit()
+        return True

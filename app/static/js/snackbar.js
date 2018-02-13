@@ -4,10 +4,10 @@ var snackbar = (function() {
     var snackbarContainer = document.querySelector('#snackbar');
   
     return {
-        show: function(message) {
+        show: function(message, time) {
             snackbarContainer.MaterialSnackbar.showSnackbar({
                 message: message,
-                timeout: 2000,
+                timeout: time || 2000,
             });
         }
     };
