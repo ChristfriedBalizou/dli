@@ -129,6 +129,7 @@ var page = (function(page){
                                   $image.addClass("hide");
                                   return;
                               }
+                              $image.addClass("hide");
                               $imageLoaderMsg.show();
                           });
                 }
