@@ -107,7 +107,7 @@ var page = (function(page){
                 break;
             default:
                 obj = {
-                    value: buildValue(obj.table || obj.link),
+                    value: buildValue(obj.table || obj.column_name || obj.link),
                     description: buildDesc(obj.description, query),
                     user: obj.user.lastName + " " + obj.user.firstName,
                     time: obj.record_date
