@@ -170,7 +170,7 @@ def search_meta(model, query):
                         relations.get(key)['link'] = list(set(relations.get(key)['link']) |
                                                           set([r.tablel.name, r.tabler.name]))
 
-            if meta.meta_type == "description":
+            if meta.meta_type == "description" and meta.meta_table is not None:
                 obj = meta.json()
 
                 if obj not in table_list:
