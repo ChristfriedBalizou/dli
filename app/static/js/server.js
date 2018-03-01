@@ -34,9 +34,14 @@ var server = (function($){
             return $.ajax(link);
         },
 
-        getDiagram: function(tables, showCols, decoration) {
-            var link = buildUrl("tables", tables.join(), showCols, decoration);
-            return $.ajax(link);
+        getDiagram: function(tables, options) {
+            return $.ajax({
+                "url": buildUrl("tables", tables.join()) + "/",
+                "method": "POST",
+                "contentType": "application/json; charset=utf-8",
+                "dataType": "json",
+                "data": JSON.stringify(options)
+            });
         },
 
         updateRelation: function(a, b, field) {

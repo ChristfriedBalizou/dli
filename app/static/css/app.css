@@ -79,6 +79,7 @@ a.no-decoration {
 .diagram-container .wrapper div.inline {
     display: inline-block !important;
     padding-left: 1em;
+    min-width: 8em;
 }
 
 .diagram-container .wrapper div.inline .mdl-switch {

@@ -274,16 +274,18 @@ def get_image(name):
     return Response(bin_image, status=200, mimetype="image/png")
 
 
-@APP.route("/tables/<tables>/<columns>/<decoration>", methods=["GET"])
-def tables_descriptions(tables, columns, decoration):
-
-    columns = True if columns == "1" else False
-    decoration = True if decoration == "1" else False
+@APP.route("/tables/<tables>/", methods=["POST"])
+def tables_descriptions(tables):
 
     req = {"action": "tables",
            "tables": tables.split(","),
-           "show_columns": columns,
-           "decoration": decoration}
+           "decoration": False,
+           "show_columns": False,
+           "draw_ia": True,
+           "draw_human": True,
+           "draw_deleted": True}
+
+    req.update(request.get_json())
 
     response, status = process(req, request.authorization)
 

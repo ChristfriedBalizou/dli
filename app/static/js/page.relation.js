@@ -14,6 +14,9 @@ var page = (function(page){
     var $diagramConainer    = $(".diagram-container");
     var $diagramContent     = $(".diagram-content");
     var $diagramCols        = $("#diagram-cols");
+    var $diagramAI          = $("#diagram-ai");
+    var $diagramDeleted     = $("#diagram-deleted");
+    var $diagramHuman       = $("#diagram-human");
     var $imageLoaderMsg     = $(".image-loading-message");
     var $reloadGraph        = $("#reload-graph");
     var $imageDragon        = $("#image-dragon");
@@ -26,17 +29,28 @@ var page = (function(page){
     page.relation = {
         init: function() {
 
-            $diagramCols.change(function(){
-                drawGraph(tables, (this.checked ? 1 : 0));
+            $diagramCols.add($diagramAI)
+                        .add($diagramHuman)
+                        .add($diagramDeleted)
+                        .change(function(){
+                            drawGraph(tables, page.relation.buildOptions());
             });
             
             $reloadGraph.click(function(){
-                drawGraph(tables, 0);
+                drawGraph(tables, page.relation.buildOptions());
             });
 
             $relationsContent.empty();
             $image.empty();
             
+        },
+
+        buildOptions: function() {
+            return {show_columns: $diagramCols.is(":checked"),
+                    decoration: false,
+                    draw_ai: $diagramAI.is(":checked"),
+                    draw_human: $diagramHuman.is(":checked"),
+                    draw_deleted: $diagramDeleted.is(":checked")};
         },
 
         render: function() {
@@ -53,7 +67,7 @@ var page = (function(page){
             var relLoader = loader.start({container: $relationsLink,
                 element: $relationsContent});
 
-            drawGraph(tables)
+            drawGraph(tables, page.relation.buildOptions())
                 .then(function(data){
                     if(data.response.data && data.response.data.relations) {
                         relations.render(data.response.data.relations, $relationsContent[0]);
@@ -66,14 +80,10 @@ var page = (function(page){
     return page;
 
 
-    function drawGraph(tables, cols, decoration) {
+    function drawGraph(tables, options) {
 
-        if(cols === undefined) {
-            cols = 0;
-        }
-
-        if(decoration === undefined) {
-            decoration = 0;
+        if(options == undefined) {
+            options = {};
         }
 
         $imageLoaderMsg.hide();
@@ -84,7 +94,7 @@ var page = (function(page){
             viewer.world.removeItem(viewer.world.getItemAt(0));
         }
 
-        return server.getDiagram(tables, cols, decoration)
+        return server.getDiagram(tables, options)
             .success(function(data){
                 //TODO common response handler
                 if(data.status != true) {
