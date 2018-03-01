@@ -28,7 +28,7 @@ class Dotit(object):
             docs=None,
             show_columns=True,
             draw_human=True,
-            draw_ia=True,
+            draw_ai=True,
             draw_deleted=True,
             relations=None):
 
@@ -54,7 +54,7 @@ class Dotit(object):
         # Options
         self.show_columns = show_columns
         self.draw_human = draw_human
-        self.draw_ia = draw_ia
+        self.draw_ai = draw_ai
         self.draw_deleted = draw_deleted
 
 
@@ -247,7 +247,7 @@ class Dotit(object):
 
             if self.draw_human is False and rel == "human":
                 continue
-            if self.draw_ia is False and rel == "ia":
+            if self.draw_ai is False and rel == "ai":
                 continue
             if self.draw_deleted is False and rel == "deleted":
                 continue

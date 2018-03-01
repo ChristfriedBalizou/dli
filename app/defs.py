@@ -177,7 +177,7 @@ def draw_dot(database, req, filename, directory):
              decoration=req.get("decoration"),
              show_columns=req.get("show_columns"),
              draw_human=req.get("draw_human"),
-             draw_ia=req.get("draw_ia"),
+             draw_ai=req.get("draw_ai"),
              draw_deleted=req.get("draw_deleted"),
              hdel_color="#BDBDBD",
              h_color="#009688",
