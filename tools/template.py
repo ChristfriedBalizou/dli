@@ -247,7 +247,7 @@ class Dotit(object):
 
             if self.draw_human is False and rel == "human":
                 continue
-            if self.draw_ai is False and rel == "ai":
+            if self.draw_ai is False and (rel == "ai" or rel is None):
                 continue
             if self.draw_deleted is False and rel == "deleted":
                 continue

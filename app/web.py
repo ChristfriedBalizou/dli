@@ -281,7 +281,7 @@ def tables_descriptions(tables):
            "tables": tables.split(","),
            "decoration": False,
            "show_columns": False,
-           "draw_ia": True,
+           "draw_ai": True,
            "draw_human": True,
            "draw_deleted": True}
 
