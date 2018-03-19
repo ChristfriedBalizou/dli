@@ -20,6 +20,9 @@ import shutil
 CURRENT_DIRECTORY = os.path.dirname(os.path.relpath(__file__))
 DIRECTORY = os.path.join(CURRENT_DIRECTORY, '..', 'share')
 DATABASE_DIR = ""
+AUTHENTICATION_EXCEMPT = ('auth_login',
+                          'auth_logout',
+                          'draw_dot',)
 authenticator = Auth.Instance()
 
 logging.basicConfig(level=logging.INFO,
@@ -70,7 +73,7 @@ def run_parrallel(args):
     ok, msg = requires_auth(req, authenticator)
 
     try:
-        if ok is False and not action.startswith("auth_"):
+        if ok is False and action not in AUTHENTICATION_EXCEMPT:
             message = msg
         elif not action in func:
             message = "Requested action {} not found".format(action)
