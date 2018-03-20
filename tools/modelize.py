@@ -5,192 +5,194 @@
  This require a well describ directory.
 '''
 
-import sys
 import os
-import re
 
 from collections import defaultdict
+
+
+def directory_walk(directory, docs, table_list):
+
+    '''
+    directory_walk and extract table with their fields
+    '''
+
+    for root, dirs, files in os.walk(directory):
+
+        for f in files:
+            if len(table_list) != 0 and f not in table_list:
+                continue
+            full_path = os.path.join(root, f)
+            table_name = os.path.basename(full_path)
+            dirpath = os.path.dirname(full_path)
+            db_name = os.path.basename(dirpath)
+
+            with open(full_path) as table_file:
+                fields = table_file.read().splitlines()
+                docs[db_name].update({table_name: set(fields)})
+
+        for d in dirs:
+            directory_walk(os.path.join(root, d), docs, table_list)
+
+
+def pair_table(table_list, tab, tables_doc, docs):
+
+    '''
+    Group table list by pairs discarding
+    reverse on same relation
+    '''
+
+    for t in table_list:
+        if (t, tab,) in docs \
+                or (tab, t,) in docs:
+                    continue
+
+        fields = [{"left": x,
+                   "right": x,
+                   "is_deleted": False,
+                   "relation_type": None}
+                   for x in (tables_doc[t] & tables_doc[tab])]
+
+        docs[(tab, t,)] = {"a": tab,
+                           "b": t,
+                           "fields": fields}
+
 
 class Modelize(object):
 
     def __init__(self,
-            directory=None,
-            table_list=[],
-            draw_relations=False,
-            relation_criterion=None):
+                 directory=None,
+                 table_list=[],
+                 draw_relations=False,
+                 relation_criterion=None):
+        '''
+        Initialize and load data
+        '''
 
-        self.docs = defaultdict(set)
-        self.relations = []
-        self.__relations_pair__ = defaultdict(set)
-        self.__fields__ = defaultdict(set)
-        self.__tables__ = {}
-        self.__table_description__ = {}
+        self.directory = os.path.expanduser(directory)
         self.table_list = table_list
         self.relation_criterion = relation_criterion
         self.draw_relations = draw_relations
-
-        self.directory = os.path.expanduser(directory)
-
 
         if not os.path.exists(self.directory):
             print "Can't open directory %s. File not found" % directory
             return None
 
-        self.__extract_tables__(self.directory)
-        self.__process__()
+        # load all tables peer database with their columns
+        self.docs = defaultdict(dict)
+        self.load_tables_peer_database()
+
+
+    def load_tables_peer_database(self):
+        '''
+        Using os.walk we recurcively go through
+        directories and read tables files.
+
+        Each directory is a database
+        '''
+
+        directory_walk(self.directory, self.docs, self.table_list)
 
 
     def dot_relations(self):
 
-        if self.draw_relations is False:
-            return []
+        '''
+        dot_relations return a dot relational
+        text format to be transform to dot file
+        '''
 
-        if len(self.relations) > 0:
-            return self.relations
+        relations = {}
 
-        self.__make_relations__()
+        for _, table_doc in self.docs.items():
+            table_list = table_doc.keys()
 
-        for k, v in self.__relations_pair__.items():
-            a, b = k
-            fields = [{"left": x,
-                       "right": x,
-                       "is_deleted": False,
-                       "relation_type": None} for x in v]
+            for tab in table_list:
+                pair_table(filter(lambda x: x != tab, table_list),
+                           tab,
+                           table_doc,
+                           relations)
 
-            self.relations.append({"a": a,
-                                   "b": b,
-                                   "fields": fields})
-
-        return self.relations
+        return relations.values()
 
 
     def dot(self):
 
+        '''
+        dot return a list of table with their columns peer database
+        '''
+
         results = []
 
         for db, table_list in self.docs.items():
-            results.append({ "name" : db, "tables" : table_list })
+
+            table_doc = [{"name": name,
+                          "fields": list(fields)}
+                         for name, fields in table_list.items()]
+
+            results.append({"name" : db,
+                            "tables" : table_doc})
 
         return results
 
 
     def table_skeleton(self, name=None):
-        if name is None:
-            return None
 
-        for _, table_list in self.docs.items():
-            table = filter(lambda x: x.get("name") == name, table_list)
-            if len(table) != 0:
-                return {name: table.pop().get("fields")}
+        '''
+        table_skeleton return a table with columns
+        e.i: {table_a: [cola, colb, ..., coln]}
+        '''
+
+        for _, tables_doc in self.docs.items():
+
+            tab_doc = tables_doc.get(name)
+
+            if tab_doc is None:
+                continue
+
+            return {name: tab_doc.values()}
 
         return None
 
 
     def statistics(self):
 
-        docs = {"tables_number": len(self.__tables__),
-                "columns_number": len(self.__fields__)}
+        '''
+        statistics return count of all columns and tables
+        '''
 
-        if len(self.table_list) == 0:
-            return docs
-
-
-        docs["tables_number"] = len(self.table_list)
-        docs["columns_number"] = 0
-
-        for _, tabs in self.__fields__.items():
-            for t in self.table_list:
-                if not t in tabs:
-                    continue
-                docs["columns_number"] = docs["columns_number"] + 1
+        #FIXME show statistic peer database
+        for _, tables_doc in self.docs.items():
+            docs = {"tables_number": len(tables_doc),
+                    "columns_number": len(tables_doc.values())}
 
         return docs
 
 
-    def __extract_tables__(self, directory):
-        for root, dirs, files in os.walk(directory):
-            for f in files:
-                if len(self.table_list) != 0 and f not in self.table_list:
-                    continue
-
-                full_path = os.path.join(root, f)
-                self.__tables__[os.path.basename(full_path)] = full_path
-
-            for d in dirs:
-                self.__extract_tables__(os.path.join(root, d))
-
-
     def list_table(self):
-        return sorted(self.tables().keys())
+
+        '''
+        list_table return a table list peer databasies
+        '''
+
+        results = []
+
+        #FIXME show table list peer database
+        for _, tables_doc in self.docs.items():
+            results += tables_doc.keys()
+
+        return sorted(results)
 
 
     def list_fields(self):
-        return sorted(self.__fields__.keys())
 
+        '''
+        list_fields return all fields peer database
+        in sort -u mode
+        '''
 
-    def tables(self):
-        return self.__tables__
+        results = set()
 
+        #FIXME show table list peer database
+        for _, tables_doc in self.docs.items():
+            results |= tables_doc.values()
 
-    def __make_relations__(self):
-
-        for field, table_list in self.__fields__.items():
-            # Do not create link with REC* columns
-            # Which are identified as Date field
-            if self.relation_criterion is not None\
-                and re.search(self.relation_criterion, field):
-                continue
-
-            for t in self.__tables__:
-
-                if len(self.table_list) != 0 and t not in self.table_list:
-                    continue
-
-                if not t in table_list:
-                    continue
-
-                self.__regroup__(field, t, table_list)
-
-
-    def __regroup__(self, field, table, table_list):
-
-        for t in table_list:
-            # Drop reverse key combination
-            if self.__relations_pair__.get((t, table,), None) is not None:
-                continue
-            # Do not create link on same table
-            if t == table:
-                continue
-
-            self.__relations_pair__[(table, t,)].add(field)
-
-
-    def __process__(self):
-
-        for table, path in self.__tables__.items():
-
-            if len(self.table_list) != 0 and table not in self.table_list:
-                continue
-
-            dirpath = os.path.dirname(path)
-            db_name = os.path.basename(dirpath)
-
-            if not db_name in self.docs:
-                self.docs[db_name] = []
-
-            table = { "name": table, "fields": self.extract_fields(path) }
-
-            self.docs[db_name].append(table)
-
-
-    def extract_fields(self, file_path):
-
-        table_name = os.path.basename(file_path)
-
-        with open(file_path) as f:
-            lines = f.read().splitlines()
-
-            for l in lines:
-                self.__fields__[l].add(table_name)
-
-        return lines
+        return sorted(results)
