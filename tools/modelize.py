@@ -193,6 +193,7 @@ class Modelize(object):
 
         #FIXME show table list peer database
         for _, tables_doc in self.docs.items():
-            results |= tables_doc.values()
+            for fields in tables_doc.values():
+                results |= fields
 
         return sorted(results)
