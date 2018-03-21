@@ -111,7 +111,7 @@ class Modelize(object):
                            table_doc,
                            relations)
 
-        return relations.values()
+        return relations
 
 
     def dot(self):

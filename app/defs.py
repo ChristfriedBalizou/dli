@@ -79,87 +79,55 @@ def list_table(database, req, filename, directory):
     return response, message
 
 
-def compute_relations(computed_relation, remove_deleted=False):
+def default_user():
+
+    '''
+    Return a default application user
+    '''
+
+    return User(username="lbdbot",
+                first_name="lbDbot",
+                last_name="lbDbot",
+                email="lbdbot@lbdbot.com").json()
+
+
+def merge_with_database(relations):
+
+    '''
+    Get all relation from database
+    and check in the computed relations if it exist
+    override the fields
+    '''
 
     sess = DBsession()
 
-    # load relations from database
-    db_rels = []
-    docs = defaultdict(list)
-    deleted_rel = []
+    for left_table, right_table in relations.keys():
 
-    for rel in computed_relation:
-        tablel = get_or_create(sess, TableModel, name=rel.get("a"))
-        tabler = get_or_create(sess, TableModel, name=rel.get("b"))
+        # We get relation from relation model where
+        # table left could be right or left table
+        # we do the same with right table
 
-        rels = (sess.query(RelationModel)
-                .filter_by(tablel=tablel,
-                           tabler=tabler)
-                .all())
-        db_rels.extend(rels)
+        rels = (set(sess.query(RelationModel)
+                    .filter(RelationModel.tablel.has(name=left_table),
+                            RelationModel.tabler.has(name=right_table))
+                    .all()) |
+                set(sess.query(RelationModel)
+                    .filter(RelationModel.tablel.has(name=right_table),
+                            RelationModel.tabler.has(name=left_table))
+                    .all()))
 
-    for db_rel in db_rels:
-        user = db_rel.user
-
-        if user is None:
-            user = User(username="lbdbot",
-                        first_name="lbDbot",
-                        last_name="lbDbot",
-                        email="lbdbot@lbdbot.com")
-
-        rela = {"left": db_rel.columnl.name,
-                "right": db_rel.columnr.name,
-                "is_deleted": db_rel.is_deleted,
-                "user": user.json(),
-                "record_date": db_rel.record_date.strftime("%Y-%M-%d %H:%M:%S"),
-                "relation_type": "human"}
-
-        if db_rel.is_deleted is True and remove_deleted is True:
-            deleted_rel.append((db_rel.tablel.name, db_rel.tabler.name,))
+        if len(rels) == 0:
             continue
 
-        docs[(db_rel.tablel.name, db_rel.tabler.name,)].append(rela)
+        fields = [{"left": r.columnl.name,
+                   "right": r.columnr.name,
+                   "is_deleted": r.is_deleted,
+                   "user": r.user.json() if r.user != None else default_user(),
+                   "record_date": r.record_date.strftime("%Y-%M-%d %H:%M:%S"),
+                   "relation_type": "human"}
+                  for r in rels]
 
-    res = []
-
-    for rel in computed_relation:
-        key = (rel.get("a"), rel.get("b"),)
-
-        if remove_deleted is True and key in deleted_rel:
-            continue
-
-        if key in docs:
-            docs[key] = remove_equal_relations(docs[key], rel.get("fields"))
-        else:
-            docs[key] = rel.get("fields")
-
-    for key, value in docs.items():
-        left_table, right_table = key
-        res.append({"a": left_table,
-                    "b": right_table,
-                    "fields": value})
-
-    return res
-
-
-def remove_equal_relations(to_keep, add_maybe):
-
-    results = defaultdict(list)
-
-    for field in to_keep:
-        key = (field.get("left"), field.get("right"),)
-        results[key].append(field)
-
-    for field in add_maybe:
-        key = (field.get("left"), field.get("right"),)
-        if key in results:
-            continue
-        results[key].append(field)
-
-    out = []
-    for _, value in results.items():
-        out.extend(value)
-    return out
+        relations[(left_table, right_table)]["fields"] = fields
 
 
 def draw_dot(database, req, filename, directory):
@@ -206,11 +174,11 @@ def tables_descriptions(database, req, filename, directory):
                          draw_relations=True,
                          table_list=req.get("tables"))
 
-        docs = model.dot()
-        relations = compute_relations(model.dot_relations())
+        relations = model.dot_relations()
+        merge_with_database(relations)
 
         response = {"docs": model.dot(),
-                    "relations": list(relations)}
+                    "relations": relations.values()}
     except Exception as e:
         message = str(e)
         logging.error(e)
@@ -234,6 +202,34 @@ def statistics(database, req, filename, directory):
         logging.error(e)
 
     return response, message
+
+
+def find_relation(sess, tablel, tabler, left_col, right_col):
+
+    '''
+    Find the exact relation matching tables and columns
+    otherwise return None
+    '''
+
+    rels = (set(sess.query(RelationModel)
+                .filter_by(tablel=tablel, tabler=tabler)
+                .all()) |
+            set(sess.query(RelationModel)
+                .filter_by(tablel=tabler, tabler=tablel)
+                .all()))
+
+    if len(rels) == 0:
+        return None
+
+    for r in rels:
+        if r.columnl.name == left_col.name \
+                and r.columnr.name == right_col.name:
+            return r
+        if r.columnl.name == right_col.name \
+                and r.columnr.name == left_col.name:
+            return r
+
+    return None
 
 
 def relation(database, req, filename, directory, **kwargs):
@@ -267,12 +263,15 @@ def relation(database, req, filename, directory, **kwargs):
                                   ColumnModel,
                                   name=field.get("right"))
 
-        rel = get_or_create(sess,
-                            RelationModel,
-                            tablel=tablel,
-                            tabler=tabler,
-                            columnl=left_col,
-                            columnr=right_col)
+        rel = find_relation(sess, tablel, tabler, left_col, right_col)
+
+        if rel is None:
+            rel = get_or_create(sess,
+                                RelationModel,
+                                tablel=tablel,
+                                tabler=tabler,
+                                columnl=left_col,
+                                columnr=right_col)
 
         rel.is_deleted=field.get("is_deleted")
         rel.user = user
