@@ -89,21 +89,9 @@ class Sybase(Adapter):
                 fmt=fmt
                 )
 
-        tables = self.tables(name=table_name, fmt="json")
-        req = []
+        req = "sp_columns @table_name='%s'" % table_name
+        return self.__runsql__(req, fmt=fmt)
 
-        for t in tables:
-            req.append((
-                "sp_columns @table_name='%s'" % (t['table_name']),
-                ))
-
-        p = Pool(1)
-        results = p.map(self.__run_parrallel__, req)
-
-        p.close()
-        p.join()
-
-        return results
 
     def __runsql__(self, sql, fmt=None):
          out, err = self.__connection__.communicate(
