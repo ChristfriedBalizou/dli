@@ -95,12 +95,14 @@ class Kruskal(object):
         weights = self.weights[db_name]
         keys = set(self.keys[db_name])
         table_list = set()
+        docs = {}
 
-        for k, rel in relations.items():
-
-            left_table, right_table = k
+        for k, rel in relations.iteritems():
 
             table_list |= set(k)
+
+            rel_doc = rel.copy()
+            rel_doc["fields"] = []
 
             for field in rel['fields']:
 
@@ -111,11 +113,12 @@ class Kruskal(object):
                 if len(keys) > 0:
                     if len(set(left.split('_')) & keys) == 0 \
                             or len(set(right.split('_')) & keys) == 0:
-                        rel['fields'].remove(field)
                         continue
 
-                key = (left_table, right_table,)
-                table_weight[key] += weights[left] + weights[right]
+                table_weight[k] += weights[left] + weights[right]
+                rel_doc["fields"].append(field)
+
+            docs[k] = rel_doc
 
 
         # Kruskal table list
@@ -140,10 +143,10 @@ class Kruskal(object):
 
             rel = None
 
-            if (table_list[i], table_list[v],) in relations:
-                rel = relations[(table_list[i], table_list[v],)]
-            if (table_list[v], table_list[i],) in relations:
-                rel = relations[(table_list[v], table_list[i],)]
+            if (table_list[i], table_list[v],) in docs:
+                rel = docs[(table_list[i], table_list[v],)]
+            if (table_list[v], table_list[i],) in docs:
+                rel = docs[(table_list[v], table_list[i],)]
 
             if rel is None:
                 continue
@@ -152,7 +155,6 @@ class Kruskal(object):
                 continue
 
             outdoc[(table_list[i], table_list[v],)] = rel
-
 
         return outdoc.values()
 
