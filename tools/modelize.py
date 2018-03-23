@@ -19,8 +19,14 @@ def directory_walk(directory, docs, table_list):
     for root, dirs, files in os.walk(directory):
 
         for f in files:
+
+            # Ignore libd file
+            if f.endswith('.libd'):
+                continue
+
             if len(table_list) != 0 and f not in table_list:
                 continue
+
             full_path = os.path.join(root, f)
             table_name = os.path.basename(full_path)
             dirpath = os.path.dirname(full_path)
@@ -101,9 +107,11 @@ class Modelize(object):
         '''
 
         relations = {}
+        db_name = None
 
-        for _, table_doc in self.docs.items():
+        for db, table_doc in self.docs.items():
             table_list = table_doc.keys()
+            db_name = db
 
             for tab in table_list:
                 pair_table(filter(lambda x: x != tab, table_list),
@@ -111,7 +119,7 @@ class Modelize(object):
                            table_doc,
                            relations)
 
-        return relations
+        return db_name, relations
 
 
     def dot(self):

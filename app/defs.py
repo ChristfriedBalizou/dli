@@ -9,6 +9,7 @@ from model.models import (
 
 from tools.modelize import Modelize
 from tools.template import Dotit
+from tools.kruskal import Kruskal
 from full_text_search import query_search
 
 try:
@@ -174,11 +175,14 @@ def tables_descriptions(database, req, filename, directory):
                          draw_relations=True,
                          table_list=req.get("tables"))
 
-        relations = model.dot_relations()
+        db_name, relations = model.dot_relations()
         merge_with_database(relations)
 
+        kruskal = Kruskal()
+        relations = kruskal.span_tree(db_name, relations)
+
         response = {"docs": model.dot(),
-                    "relations": relations.values()}
+                    "relations": relations}
     except Exception as e:
         message = str(e)
         logging.error(e)
