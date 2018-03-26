@@ -156,7 +156,7 @@ class Modelize(object):
             if tab_doc is None:
                 continue
 
-            return {name: tab_doc.values()}
+            return {name: tab_doc}
 
         return None
 
