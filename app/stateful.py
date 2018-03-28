@@ -200,7 +200,7 @@ if __name__ == "__main__":
                         help="Destination directory")
 
     parser.add_argument("-p", "--pull-request",
-                        destination="pull_request",
+                        dest="pull_request",
                         default=False,
                         action="store_true",
                         help="Pull request from destination directory")
@@ -215,7 +215,7 @@ if __name__ == "__main__":
         parser.print_help()
         sys.exit(1)
 
-    DIRECTORY = os.path.expanduser(options.directory)
+    DIRECTORY = os.path.expanduser(options.source)
     DATABASE_DIR = os.path.expanduser(options.database)
 
     if DATABASE_DIR is None or not os.path.exists(DATABASE_DIR):
