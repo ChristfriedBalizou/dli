@@ -15,6 +15,7 @@ import os
 import json
 import time
 import shutil
+import subprocess
 
 
 CURRENT_DIRECTORY = os.path.dirname(os.path.relpath(__file__))
@@ -31,6 +32,25 @@ logging.basicConfig(level=logging.INFO,
 
 if os.path.exists(DIRECTORY) is False:
     os.mkdir(DIRECTORY)
+
+
+def rsync(src, dest, args=""):
+
+    '''
+    Copy file from destination to remote
+    '''
+
+    cmd = 'rsync -avzP {} {} {}'.format(
+            args,
+            src,
+            dest
+        )
+
+    with open(os.devnull, 'w') as DEVNULL:
+        subprocess.call(
+                cmd.split(' '),
+                stdout=DEVNULL,
+                stderr=subprocess.STDOUT)
 
 
 def requires_auth(req, auth_context):
@@ -123,6 +143,14 @@ class Stateful(LoggingEventHandler):
     Stateful
     '''
 
+
+    def __init__(self, destination, sync_remote=False):
+
+        super(Stateful, self).__init__()
+        self.sync_remote = sync_remote
+        self.destination = destination
+
+
     def process(self, event, path=None):
 
         '''
@@ -135,7 +163,12 @@ class Stateful(LoggingEventHandler):
 
         filename = os.path.basename(src_path)
         directory = os.path.dirname(src_path)
-        run(filename, directory)
+
+        if filename.endswith(".req"):
+            run(filename, directory)
+
+        if filename.endswith(".png") and self.sync_remote is not None:
+            rsync(src_path, self.destination, args="--remove-source-files")
 
 
     def on_created(self, event):
@@ -158,9 +191,19 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-d", "--directory",
+    parser.add_argument("-s", "--source",
                         default=DIRECTORY,
-                        help="Exchange directory")
+                        help="Source directory")
+
+    parser.add_argument("-d", "--destination",
+                        required=True,
+                        help="Destination directory")
+
+    parser.add_argument("-p", "--pull-request",
+                        destination="pull_request",
+                        default=False,
+                        action="store_true",
+                        help="Pull request from destination directory")
 
     parser.add_argument("--database",
                         required=True,
@@ -168,17 +211,22 @@ if __name__ == "__main__":
 
     options = parser.parse_args()
 
+    if options.destination is None:
+        parser.print_help()
+        sys.exit(1)
+
     DIRECTORY = os.path.expanduser(options.directory)
     DATABASE_DIR = os.path.expanduser(options.database)
 
     if DATABASE_DIR is None or not os.path.exists(DATABASE_DIR):
-        logging.error("Missing database directory")
+        parser.print_help()
         sys.exit(1)
 
     if not os.path.exists(DIRECTORY):
         os.mkdir(DIRECTORY)
 
-    event_handler = Stateful()
+    event_handler = Stateful(options.destination,
+                             sync_remote=options.pull_request)
 
     observer = Observer()
     observer.schedule(event_handler, DIRECTORY, recursive=True)
@@ -186,8 +234,16 @@ if __name__ == "__main__":
 
     try:
         logging.info("Watching directory {} for changes".format(DIRECTORY))
+
         while True:
+
+            if options.pull_request is True:
+                rsync("%s/*.req" % options.destination,
+                      options.source,
+                      args="--remove-source-files")
+
             time.sleep(0.5)
+
     except KeyboardInterrupt:
         observer.stop()
     observer.join()
