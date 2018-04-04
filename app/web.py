@@ -377,6 +377,19 @@ def columns(name):
                     mimetype="application/json")
 
 
+@APP.route("/tables/column/<name>", methods=["GET"])
+def get_tables_by_column(name):
+
+    req = {"action": "tables_by_column",
+            "name": name}
+
+    response, status = process(req, request.authorization)
+
+    return Response(response,
+                    status=status,
+                    mimetype="application/json")
+
+
 @APP.route("/relation/<table_left>/<table_right>/", methods=["POST"])
 def relation(table_left, table_right):
 

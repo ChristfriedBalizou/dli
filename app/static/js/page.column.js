@@ -5,7 +5,10 @@ var page = (function(page){
     var $tag = document.querySelector("#tagcol-component");
     var $other = document.querySelector("#othercol-component");
 
-
+    // TABLES
+    var $tableContainer = $(".tables-container");
+    var $tables = $(".tables");
+    
     // Table
     var $columnsCompContainer = $(".column-container");
     var $columnComponent = $("#column-component"); 
@@ -39,6 +42,33 @@ var page = (function(page){
 
                   }).always(loader.start({container: $columnsCompContainer, 
                       element:$columnComponent}));
+
+
+            server.getTablesByColumn(column)
+                  .success(function(data){
+                      if(data.status != true) {
+                          snackbar.show(data.response.message);
+                          return;
+                      }
+                      
+                      var $row = data.response.data.map(function(value){
+                          return (
+                              "<li class=\"mdl-list__item\">" +
+                                 "<span class=\"mdl-list__item-primary-content\">" +
+                                     "<span class=\"mdl-chip\">" +
+                                         "<a class=\"mdl-chip__text no-decoration\"" +
+                                             "href=\"/#table/"+ value +"\">" +
+                                             value +
+                                         "</a>" +
+                                     "</span>" +
+                                 "</span>" +
+                              "</li>"
+                          );
+                      });
+
+                      $tables.html($row);
+                      componentHandler.upgradeElements($tables[0]);
+                  }).always(loader.start({container: $tableContainer, element: $tables}));
 
             // tags
             if(TagColElement) {

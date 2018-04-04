@@ -161,6 +161,21 @@ class Modelize(object):
         return None
 
 
+    def get_tables_by_column(self, name=None):
+        '''
+        get_tables_by_column return table list
+        containing a specific column
+        '''
+
+        res = set()
+
+        for _, tables_doc in self.docs.iteritems():
+            res |= set([table_name
+                       for table_name, cols in tables_doc.iteritems()
+                       if name in cols ])
+        return list(res)
+
+
     def statistics(self):
 
         '''

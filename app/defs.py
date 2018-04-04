@@ -322,6 +322,23 @@ def get_table_columns(database, req, filename, directory, **kwargs):
     return response, message
 
 
+def get_tables_by_column(database, req, filename, directory, **kwargs):
+
+    message = None
+    response = None
+
+    try:
+        model = modelize(directory=database)
+        name = req.get("name")
+        response = sorted(model.get_tables_by_column(name=name))
+
+    except Exception as e:
+        message = str(e)
+        logging.error(e)
+
+    return response, message
+
+
 def login(database,
                req,
                filename,
@@ -622,6 +639,7 @@ func = {"listTables": list_table,
         "draw_dot": draw_dot,
         "relation": relation,
         "columns": get_table_columns,
+        "tables_by_column": get_tables_by_column,
         "auth_login": login,
         "auth_logout": logout,
         "metadata": get_metadata,

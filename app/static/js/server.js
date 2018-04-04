@@ -73,6 +73,10 @@ var server = (function($){
             return $.get(buildUrl("columns", name));
         },
 
+        getTablesByColumn: function(name) {
+            return $.get(buildUrl("tables", "column", name));
+        },
+
         getTableDescription: function(name) {
             return $.get(buildUrl("table", name));
         },
