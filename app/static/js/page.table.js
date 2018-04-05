@@ -6,6 +6,7 @@ var page = (function(page){
     // COLUMNS
     var $colContainer = $(".columns-container");
     var $columns = $(".columns");
+    var $columnsCount = $(".columns-count");
 
     //META
     var $tag = document.querySelector("#tag-component");
@@ -53,7 +54,7 @@ var page = (function(page){
                       });
 
                       $columns.html($row);
-
+                      $columnsCount.html("&nbsp; ("+ data.response.data.length +")");
                       componentHandler.upgradeElements($columns[0]);
 
                   }).always(loader.start({container: $colContainer,

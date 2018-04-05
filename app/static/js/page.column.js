@@ -8,6 +8,7 @@ var page = (function(page){
     // TABLES
     var $tableContainer = $(".tables-container");
     var $tables = $(".tables");
+    var $tableCount = $(".tables-count");
     
     // Table
     var $columnsCompContainer = $(".column-container");
@@ -66,6 +67,7 @@ var page = (function(page){
                           );
                       });
 
+                      $tableCount.html("&nbsp; (" + data.response.data.length + ")");
                       $tables.html($row);
                       componentHandler.upgradeElements($tables[0]);
                   }).always(loader.start({container: $tableContainer, element: $tables}));
