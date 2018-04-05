@@ -292,6 +292,31 @@ def filter_result(results, doc):
             obj.append(r)
 
 
+def local_dir_search(model, query):
+
+    table_list = model.list_table()
+
+    tabs = set()
+    cols = set()
+
+    for t in table_list:
+
+        # create table list
+        if query.lower() in t.lower():
+            tabs.add(t)
+
+        # load columns
+        doc = model.table_skeleton(name=t)
+        column_list = doc.get(t, [])
+
+        for c in column_list:
+            if query.lower() in c.lower():
+                cols.add(c)
+
+    return [{"tag": "tables", "res": tabs},
+            {"tag": "columns", "res": cols}]
+
+
 def query_search(query, directory):
 
     docs = {
@@ -302,7 +327,7 @@ def query_search(query, directory):
 
     patterns = query.split()
     requests = []
-    model = Modelize(directory=directory, draw_relations=True, relation_criterion="^REC")
+    model = Modelize(directory=directory, draw_relations=True)
 
     for pattern in patterns:
         args = (model, pattern,)
@@ -310,6 +335,7 @@ def query_search(query, directory):
         requests.append((search_column, args,))
         requests.append((search_relation, args,))
         requests.append((search_meta, args,))
+        requests.append((local_dir_search, args,))
 
     p = Pool(4)
 
