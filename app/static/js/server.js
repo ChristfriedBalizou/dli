@@ -23,11 +23,11 @@ var server = (function($){
     return {
 
         getTableList: function() {
-            return $.ajax(buildUrl("tables"))
+            return $.ajax(buildUrl(getDatabase(), "tables"))
         },
 
         getStatistics: function(tableList) {
-            var link = buildUrl("statistics");
+            var link = buildUrl(getDatabase(), "statistics");
             if(tableList && tableList.length > 0){
                 link += "/" + tableList.join(",")
             }
@@ -36,7 +36,7 @@ var server = (function($){
 
         getDiagram: function(tables, options) {
             return $.ajax({
-                "url": buildUrl("tables", tables.join()) + "/",
+                "url": buildUrl(getDatabase(), "tables", tables.join()) + "/",
                 "method": "POST",
                 "contentType": "application/json; charset=utf-8",
                 "dataType": "json",
@@ -46,7 +46,7 @@ var server = (function($){
 
         updateRelation: function(a, b, field) {
             return $.ajax({
-                "url": buildUrl("relation", a, b) + "/",
+                "url": buildUrl(getDatabase(), "relation", a, b) + "/",
                 "method": "POST",
                 "contentType": "application/json; charset=utf-8",
                 "dataType": "json",
@@ -70,24 +70,24 @@ var server = (function($){
         },
 
         getTableColumns: function(name) {
-            return $.get(buildUrl("columns", name));
+            return $.get(buildUrl(getDatabase(), "columns", name));
         },
 
         getTablesByColumn: function(name) {
-            return $.get(buildUrl("tables", "column", name));
+            return $.get(buildUrl(getDatabase(), "tables", "column", name));
         },
 
         getTableDescription: function(name) {
-            return $.get(buildUrl("table", name));
+            return $.get(buildUrl(getDatabase(), "table", name));
         },
 
         getMetadataTable: function(category, name, metaType) {
-            return $.get(buildUrl("metadata", category, name, metaType));
+            return $.get(buildUrl(getDatabase(), "metadata", category, name, metaType));
         },
 
         setMetadataTable: function(category, name, metaType, data) {
             return $.ajax({
-                "url": buildUrl("metadata", category, name, metaType),
+                "url": buildUrl(getDatabase(), "metadata", category, name, metaType),
                 "method": "POST",
                 "contentType": "application/json; charset=utf-8",
                 "dataType": "json",
@@ -97,7 +97,7 @@ var server = (function($){
 
         search: function(query) {
             return $.ajax({
-                "url": buildUrl("search/"),
+                "url": buildUrl(getDatabase(), "search/"),
                 "method": "POST",
                 "data": JSON.stringify({query: query}), 
                 "contentType": "application/json; charset=utf-8",

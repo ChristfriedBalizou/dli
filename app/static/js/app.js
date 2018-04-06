@@ -1,5 +1,13 @@
 "use strict";
 
+function getDatabase() {
+    // return selected database each
+    // time its called
+    return "DECALOG_SCHEMA";
+
+}
+
+
 $(function(){
 
     // ENDPOINTS

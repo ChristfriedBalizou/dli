@@ -274,8 +274,8 @@ def get_image(name):
     return Response(bin_image, status=200, mimetype="image/png")
 
 
-@APP.route("/tables/<tables>/", methods=["POST"])
-def tables_descriptions(tables):
+@APP.route("/<database>/tables/<tables>/", methods=["POST"])
+def tables_descriptions(database, tables):
 
     req = {"action": "tables",
            "tables": tables.split(","),
@@ -283,7 +283,8 @@ def tables_descriptions(tables):
            "show_columns": False,
            "draw_ai": True,
            "draw_human": True,
-           "draw_deleted": True}
+           "draw_deleted": True,
+           "db_name": database}
 
     req.update(request.get_json())
 
@@ -293,12 +294,13 @@ def tables_descriptions(tables):
                     status=status,
                     mimetype="application/json")
 
-@APP.route("/statistics", defaults={"tables": ""}, methods=["GET"])
-@APP.route("/statistics/<tables>", methods=["GET"])
-def statistics(tables):
+@APP.route("/<database>/statistics", defaults={"tables": ""}, methods=["GET"])
+@APP.route("/<database>/statistics/<tables>", methods=["GET"])
+def statistics(database, tables):
 
     req = {"action": "statistics",
-           "tables": filter(bool, tables.split(","))}
+           "tables": filter(bool, tables.split(",")),
+           "db_name": database}
 
     response, status = process(req, request.authorization)
     return Response(response,
@@ -306,13 +308,14 @@ def statistics(tables):
                     mimetype="application/json")
 
 
-@APP.route("/metadata/<category>/<name>/<meta_type>", methods=["GET", "POST"])
-def metadata(category, name, meta_type):
+@APP.route("/<database>/metadata/<category>/<name>/<meta_type>", methods=["GET", "POST"])
+def metadata(database, category, name, meta_type):
 
     req = {"action": "metadata",
            "category": category,
            "meta_type": meta_type,
-           "name": name}
+           "name": name,
+           "db_name": database}
 
     if request.method == "POST":
         req["action"] = "create_or_update_metadata"
@@ -324,11 +327,12 @@ def metadata(category, name, meta_type):
                     mimetype="application/json")
 
 
-@APP.route("/table/<name>", methods=["GET"])
-def table(name):
+@APP.route("/<database>/table/<name>", methods=["GET"])
+def table(database, name):
 
     req = {"action": "table",
-            "name": name }
+            "name": name,
+            "db_name": database}
 
     response, status = process(req, request.authorization)
 
@@ -337,13 +341,14 @@ def table(name):
                     mimetype="application/json")
 
 
-@APP.route("/search/", methods=["POST"])
-def text_search():
+@APP.route("/<database>/search/", methods=["POST"])
+def text_search(database):
 
     query = request.get_json()
 
     req = {"action": "search",
-           "query": query.get("query")}
+           "query": query.get("query"),
+           "db_name": database}
 
     response, status = process(req, request.authorization)
 
@@ -352,10 +357,10 @@ def text_search():
                     mimetype="application/json")
 
 
-@APP.route("/tables", methods=["GET"])
-def tables():
+@APP.route("/<database>/tables", methods=["GET"])
+def tables(database):
 
-    req = {"action": "listTables"}
+    req = {"action": "listTables", "db_name": database}
 
     response, status = process(req, request.authorization)
 
@@ -364,11 +369,12 @@ def tables():
                     mimetype="application/json")
 
 
-@APP.route("/columns/<name>", methods=["GET"])
-def columns(name):
+@APP.route("/<database>/columns/<name>", methods=["GET"])
+def columns(database, name):
 
     req = {"action": "columns",
-           "name": name}
+           "name": name,
+           "db_name": database}
 
     response, status = process(req, request.authorization)
 
@@ -377,11 +383,12 @@ def columns(name):
                     mimetype="application/json")
 
 
-@APP.route("/tables/column/<name>", methods=["GET"])
-def get_tables_by_column(name):
+@APP.route("/<database>/tables/column/<name>", methods=["GET"])
+def get_tables_by_column(database, name):
 
     req = {"action": "tables_by_column",
-            "name": name}
+            "name": name,
+            "db_name": database}
 
     response, status = process(req, request.authorization)
 
@@ -390,13 +397,14 @@ def get_tables_by_column(name):
                     mimetype="application/json")
 
 
-@APP.route("/relation/<table_left>/<table_right>/", methods=["POST"])
-def relation(table_left, table_right):
+@APP.route("/<database>/relation/<table_left>/<table_right>/", methods=["POST"])
+def relation(database, table_left, table_right):
 
     req = {"action": "relation",
            "field": request.get_json(),
            "table_left": table_left,
-           "table_right": table_right}
+           "table_right": table_right,
+           "db_name": database}
 
     response, status = process(req, request.authorization)
 
