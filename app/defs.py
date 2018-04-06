@@ -71,7 +71,7 @@ def list_table(database, req, filename, directory):
     response = None
     message = None
     try:
-        model = modelize(directory=database)
+        model = modelize(directory=database, database=req.get("db_name"))
         response = model.list_table()
     except Exception as e:
         message = str(e)
@@ -173,7 +173,8 @@ def tables_descriptions(database, req, filename, directory):
         model = modelize(directory=database,
                          relation_criterion="^REC",
                          draw_relations=True,
-                         table_list=req.get("tables"))
+                         table_list=req.get("tables"),
+                         database=req.get("db_name"))
 
         db_name, relations = model.dot_relations()
         merge_with_database(relations)
@@ -199,7 +200,8 @@ def statistics(database, req, filename, directory):
         model = modelize(directory=database,
                          relation_criterion="^REC",
                          draw_relations=True,
-                         table_list=req.get("tables"))
+                         table_list=req.get("tables"),
+                         database=req.get("db_name"))
         response = model.statistics()
     except Exception as e:
         message = str(e)
@@ -307,7 +309,7 @@ def get_table_columns(database, req, filename, directory, **kwargs):
     response = None
 
     try:
-        model = modelize(directory=database)
+        model = modelize(directory=database, database=req.get("db_name"))
         columns = model.table_skeleton(name=req.get("name"))
 
         if columns is None:
@@ -328,7 +330,7 @@ def get_tables_by_column(database, req, filename, directory, **kwargs):
     response = None
 
     try:
-        model = modelize(directory=database)
+        model = modelize(directory=database, database=req.get("db_name"))
         name = req.get("name")
         response = sorted(model.get_tables_by_column(name=name))
 
@@ -632,6 +634,21 @@ def text_search(database, req, filename, directory):
     return response, message
 
 
+def get_database_list(database, req, filename, directory):
+
+    response = None
+    message = None
+
+    try:
+        model = modelize(directory=database)
+        response = sorted(model.get_database_list())
+    except Exception as e:
+        message = str(e)
+        logging.error(e)
+
+    return response, message
+
+
 # All exposed function should be placed here
 func = {"listTables": list_table,
         "statistics": statistics,
@@ -645,5 +662,6 @@ func = {"listTables": list_table,
         "metadata": get_metadata,
         "create_or_update_metadata": create_or_update_metadata,
         "wall_of_fam": wall_of_fam,
-        "search": text_search
+        "search": text_search,
+        "databases": get_database_list
         }

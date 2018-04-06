@@ -10,7 +10,7 @@ import os
 from collections import defaultdict
 
 
-def directory_walk(directory, docs, table_list):
+def directory_walk(directory, docs, table_list, database=None):
 
     '''
     directory_walk and extract table with their fields
@@ -32,12 +32,15 @@ def directory_walk(directory, docs, table_list):
             dirpath = os.path.dirname(full_path)
             db_name = os.path.basename(dirpath)
 
+            if database is not None and database != db_name:
+                continue
+
             with open(full_path) as table_file:
                 fields = table_file.read().splitlines()
                 docs[db_name].update({table_name: set(fields)})
 
         for d in dirs:
-            directory_walk(os.path.join(root, d), docs, table_list)
+            directory_walk(os.path.join(root, d), docs, table_list, database=database)
 
 
 def pair_table(table_list, tab, tables_doc, docs):
@@ -69,7 +72,8 @@ class Modelize(object):
                  directory=None,
                  table_list=[],
                  draw_relations=False,
-                 relation_criterion=None):
+                 relation_criterion=None,
+                 database=None):
         '''
         Initialize and load data
         '''
@@ -78,6 +82,7 @@ class Modelize(object):
         self.table_list = table_list
         self.relation_criterion = relation_criterion
         self.draw_relations = draw_relations
+        self.database = database
 
         if not os.path.exists(self.directory):
             print "Can't open directory %s. File not found" % directory
@@ -96,7 +101,17 @@ class Modelize(object):
         Each directory is a database
         '''
 
-        directory_walk(self.directory, self.docs, self.table_list)
+        directory_walk(self.directory,
+                       self.docs,
+                       self.table_list,
+                       database=self.database)
+
+
+    def get_database_list(self):
+        '''
+        get_database_list get the list of all database's
+        '''
+        return self.docs.keys()
 
 
     def dot_relations(self):
@@ -105,6 +120,8 @@ class Modelize(object):
         dot_relations return a dot relational
         text format to be transform to dot file
         '''
+
+        # TODO what will happen with many database ?
 
         relations = {}
         db_name = None
