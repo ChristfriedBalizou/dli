@@ -564,8 +564,12 @@ a.no-decoration {
     top: .8em;
 }
 
+.getmdl-select .mdl-textfield__label:after {
+    background: transparent !important;
+}
+
 .getmdl-select .mdl-menu__container {
-    margin-left: .5em;
+    /* margin-left: .5em; */
 }
 
 #databases.mdl-textfield__input {
