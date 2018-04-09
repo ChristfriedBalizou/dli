@@ -9,6 +9,7 @@ var page = (function(page){
     var $statistic = $(".statistic");
 
     var $databases = $("#databases");
+    var AutoCompletElement;
 
 	class ChipsElement extends React.Component {
 		constructor(props) {
@@ -355,7 +356,12 @@ var page = (function(page){
                             console.error(data.response.message)
                             return;
                         }
-                        ReactDOM.render(
+
+                        if(AutoCompletElement) {
+                            ReactDOM.unmountComponentAtNode($container[0]);
+                        }
+
+                        AutoCompletElement = ReactDOM.render(
                             React.createElement(AutoCompleter, {dataSource: data.response.data}), 
                             $container[0]);
 
