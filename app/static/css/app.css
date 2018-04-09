@@ -540,6 +540,42 @@ a.no-decoration {
 }
 
 
+/* Database element */
+
+#databases {
+    height: 62%;
+    position: relative;
+    background: #fff;
+    border-radius: 1.5px;
+    color: #222;
+    top: .1em;
+    margin-left: .5em;
+    padding-left: .7em;
+    width: 14em !important;
+    box-shadow: 0 2px 2px 0 rgba(0,0,0,.14), 0 3px 1px -2px rgba(0,0,0,.2), 0 1px 5px 0 rgba(0,0,0,.12);
+}
+
+.getmdl-select.mdl-textfield {
+    width: 14em !important;
+}
+
+.getmdl-select .mdl-textfield__label {
+    padding-left: 1em;
+    top: .8em;
+}
+
+.getmdl-select .mdl-menu__container {
+    margin-left: .5em;
+}
+
+#databases.mdl-textfield__input {
+    border: none;
+    color: #222;
+    border-bottom: none;
+    width: 14em !important;
+}
+
+
 /* For search page */
 #search-page-container .results ul > li {
     overflow: visible;

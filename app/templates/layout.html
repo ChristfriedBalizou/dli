@@ -5,6 +5,7 @@
         <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='fonts/MaterialIcons.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='libs/material/material.min.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='libs/material/getmdl-select.min.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='libs/typeahead/typeaheadjs.min.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
     </head>
@@ -29,6 +30,26 @@
                         </div>
                         <button class="hide">search</button>
                     </form>
+                    
+                    
+                    <!-- DATABASE LIST -->
+                    <div class="mdl-textfield no-padding mdl-js-textfield getmdl-select">
+                        <input type="text" value="" class="mdl-textfield__input" id="databases" readonly>
+                        <input type="hidden" value="" name="database">
+                        <i class="mdl-icon-toggle__label material-icons">keyboard_arrow_down</i>
+                        <label for="databases" class="mdl-textfield__label">Databases</label>
+                        <ul for="databases" class="mdl-menu mdl-menu--bottom-left mdl-js-menu">
+                            {% for db in databases.response.data %}
+                                    <li class="mdl-menu__item"
+                                        data-val="{{db}}"
+                                        {% if loop.first %}
+                                             data-selected="true"
+                                        {% endif %}>{{ db }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+
 
                     <!-- Add spacer, to align navigation to the right  -->
                     <div class="mdl-layout-spacer"></div>
@@ -73,6 +94,7 @@
         <script src="{{ url_for('static', filename='libs/cryptojs/core.min.js') }}"></script>
         <script src="{{ url_for('static', filename='libs/cryptojs/md5.js') }}"></script>
         <script src="{{ url_for('static', filename='libs/material/material.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='libs/material/getmdl-select.min.js') }}"></script>
         <script src="{{ url_for('static', filename='libs/react/react.production.min.js') }}"></script>
         <script src="{{ url_for('static', filename='libs/react/react-dom.production.min.js') }}"></script>
         <script src="{{ url_for('static', filename='libs/openseadragon.min.js') }}"></script>

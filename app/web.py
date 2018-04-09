@@ -35,7 +35,7 @@ DIRECTORY = os.path.join(CURRENT_DIRECTORY, '..', 'share')
 
 APP = Flask(__name__)
 APP.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-DELISTED = ("auth_login", "auth_logout")
+DELISTED = ("auth_login", "auth_logout", "databases")
 authenticator = Auth.Instance()
 
 
@@ -220,7 +220,12 @@ def process(req, authorization=None):
 
 @APP.route("/")
 def home(**kwargs):
-    return render_template('index.html', **kwargs)
+
+    req = {"action": "databases"}
+    response, _=  process(req)
+    return render_template('index.html',
+                           databases=json.loads(response),
+                           **kwargs)
 
 
 @APP.route("/login/", methods=["POST"])

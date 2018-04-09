@@ -3,8 +3,8 @@
 function getDatabase() {
     // return selected database each
     // time its called
-    return "DECALOG_SCHEMA";
-
+    return ($("#databases").val() || 
+            $("[for=databases]").find("li[data-selected]").text());
 }
 
 
