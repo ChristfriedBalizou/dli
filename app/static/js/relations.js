@@ -22,7 +22,7 @@ var relations = (function(){
                 datumTokenizer: Bloodhound.tokenizers.whitespace,
                 queryTokenizer: Bloodhound.tokenizers.whitespace,
                 prefetch: {
-                    url: "/columns/" + this.state.table,
+                    url: "/" + getDatabase() + "/columns/" + this.state.table,
                     cache: false,
                     filter: function(data) {
                         return data.response.data
