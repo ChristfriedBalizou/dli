@@ -8,7 +8,6 @@ var page = (function(page){
     var $statisticContainer = $(".statistic-container");
     var $statistic = $(".statistic");
 
-    var $databases = $("#databases");
     var AutoCompletElement;
 
 	class ChipsElement extends React.Component {
@@ -336,11 +335,6 @@ var page = (function(page){
                 $("main").animate({scrollTop: 0}, 200);
             });
 
-            $databases.on("change", function(){
-                cache.getInstance().remove("tables");
-                cache.getInstance().remove("statistics");
-                page.prerelation.render();
-            });
             return this;
         },
 
