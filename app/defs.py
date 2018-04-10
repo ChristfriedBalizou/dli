@@ -479,6 +479,12 @@ def wall_of_fam(database, req, filename, directory):
     response = None
     message = None
 
+    db_name = req.get("db_name")
+    model = None
+
+    if db_name is not None:
+        model = Modelize(directory=database, database=db_name)
+
     try:
         sess = DBsession()
         res = {}
@@ -504,6 +510,14 @@ def wall_of_fam(database, req, filename, directory):
                 entity = meta.meta_table
                 category = "table"
 
+            if category == "column" and \
+                    db_name not in model.which_db_is_column(entity.name):
+                        continue
+
+            if category == "table" and \
+                    db_name not in model.which_db_is_table(entity.name):
+                        continue
+
             user = "%s %s" % (meta.user.first_name, meta.user.last_name)
 
             key = (user, entity, meta.meta_type,)
@@ -526,6 +540,10 @@ def wall_of_fam(database, req, filename, directory):
         for rel in relations:
             if rel.user is None:
                 continue
+
+            if db_name not in model.which_db_is_table(rel.tablel.name) \
+                    or db_name not in model.which_db_is_table(rel.tabler.name):
+                        continue
 
             user = "%s %s" % (rel.user.first_name, rel.user.last_name)
             key = (user, rel.tabler.name, rel.tablel.name,)

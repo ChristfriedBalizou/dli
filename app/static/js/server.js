@@ -106,7 +106,7 @@ var server = (function($){
         },
         
         getFam: function() {
-            return $.get(buildUrl("fam"));
+            return $.get(buildUrl(getDatabase(), "fam"));
         },
 
         forgotPassword: function(email) {

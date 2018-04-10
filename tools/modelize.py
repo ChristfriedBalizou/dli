@@ -139,6 +139,41 @@ class Modelize(object):
         return db_name, relations
 
 
+    def which_db_is_table(self, name):
+
+        '''
+        which_db_is_table return the list of database corresponding to
+        the specific table
+        '''
+
+        database_list = set()
+
+        for db, table_doc in self.docs.iteritems():
+
+            if name in table_doc:
+                database_list.add(db)
+
+        return database_list
+
+
+
+    def which_db_is_column(self, name):
+
+        '''
+        which_db_is_column return the list of database corresponding to
+        the specific column
+        '''
+
+        database_list = set()
+
+        for db, table_doc in self.docs.iteritems():
+
+            if name in table_doc.values():
+                database_list.add(db)
+
+        return database_list
+
+
     def dot(self):
 
         '''

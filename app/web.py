@@ -471,10 +471,10 @@ def get_user_by_token(token):
                     mimetype="application/json")
 
 
-@APP.route("/fam", methods=["GET"])
-def wall_of_fam():
+@APP.route("/<database>/fam", methods=["GET"])
+def wall_of_fam(database):
 
-    req = {"action": "wall_of_fam"}
+    req = {"action": "wall_of_fam", "db_name": database}
 
     response, status = process(req, request.authorization)
 
