@@ -626,7 +626,9 @@ def text_search(database, req, filename, directory):
     message = None
 
     try:
-        response = query_search(req.get("query"), database)
+        response = query_search(req.get("query"),
+                                database,
+                                db_name=req.get("db_name"))
     except Exception as e:
         message = str(e)
         logging.error(e)

@@ -317,7 +317,7 @@ def local_dir_search(model, query):
             {"tag": "columns", "res": cols}]
 
 
-def query_search(query, directory):
+def query_search(query, directory, db_name=None):
 
     docs = {
         "tables": [],
@@ -327,7 +327,9 @@ def query_search(query, directory):
 
     patterns = query.split()
     requests = []
-    model = Modelize(directory=directory, draw_relations=True)
+    model = Modelize(directory=directory,
+                     draw_relations=True,
+                     database=db_name)
 
     for pattern in patterns:
         args = (model, pattern,)
