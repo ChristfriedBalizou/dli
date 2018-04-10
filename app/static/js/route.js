@@ -24,6 +24,15 @@ var router = (function(session) {
         hasEndpoint: function (name) {
             return path[name] != null;
         },
+
+        getCurrentPage: function(hash) {
+            return hash.splice(0, 1).pop();
+        },
+
+        getArguments: function(hash) {
+            hash.splice(0, 1).pop();
+            return hash;
+        },
         
         render: function(hash) {
             var page = hash.splice(0, 1)

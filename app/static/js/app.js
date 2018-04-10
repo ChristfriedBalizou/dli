@@ -10,6 +10,8 @@ function getDatabase() {
 
 $(function(){
 
+    var $database = $("#databases");// Database list
+
     // ENDPOINTS
     var endpoint = {
         "home": page.home.render,
@@ -44,6 +46,15 @@ $(function(){
 
     // upgrade component
     componentHandler.upgradeDom();
+
+    // reload page on database change
+    $database.change(function(){
+        var hash = location.hash
+                           .replace(/^#/, '')
+                           .split("/");
+        var page = router.getCurrentPage(hash);
+        endpoint[page].apply(null, hash);
+    });
 
     // Start page
     var hash = location.hash
