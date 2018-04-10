@@ -342,48 +342,42 @@ var page = (function(page){
 
             
             // Load table list
-            if(!cache.getInstance().hasData("tables")) {
-                server.getTableList()
-                    .done(function(data){
-                        //Todo common response handler
-                        if(data.status != true) {
-                            console.error(data.response.message)
-                            return;
-                        }
+            server.getTableList()
+                .done(function(data){
+                    //Todo common response handler
+                    if(data.status != true) {
+                        console.error(data.response.message)
+                        return;
+                    }
 
-                        if(AutoCompletElement) {
-                            ReactDOM.unmountComponentAtNode($container[0]);
-                        }
+                    if(AutoCompletElement) {
+                        ReactDOM.unmountComponentAtNode($container[0]);
+                    }
 
-                        AutoCompletElement = ReactDOM.render(
-                            React.createElement(AutoCompleter, {dataSource: data.response.data}), 
-                            $container[0]);
+                    AutoCompletElement = ReactDOM.render(
+                        React.createElement(AutoCompleter, {dataSource: data.response.data}), 
+                        $container[0]);
 
-                        cache.getInstance().add("tables", data.response.data);
-                    });
-            }
+                });
             
             
             // Load statistics information
-            if(!cache.getInstance().hasData("statistics")) {
-                server.getStatistics()
-                    .done(function(data){
-                        //TODO common response handler
-                        if(data.status != true) {
-                            console.error(data.response.message)
-                            return;
-                        }
+            server.getStatistics()
+                .done(function(data){
+                    //TODO common response handler
+                    if(data.status != true) {
+                        console.error(data.response.message)
+                        return;
+                    }
 
-                        var msg = "Loaded ";
-                        msg += data.response.data.tables_number;
-                        msg += " tables in " + data.elapsed_time;
-                        
-                        $statistic.text(msg + ".");
-                        cache.getInstance().add("statistics", data.response.data);
-                    })
-                    .always(loader.start({container: $statisticContainer,
-                        element: $statistic}));
-            }
+                    var msg = "Loaded ";
+                    msg += data.response.data.tables_number;
+                    msg += " tables in " + data.elapsed_time;
+                    
+                    $statistic.text(msg + ".");
+                })
+                .always(loader.start({container: $statisticContainer,
+                    element: $statistic}));
 
             return this;
         }
