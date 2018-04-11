@@ -78,7 +78,8 @@ $(function(){
                            .replace(/^#/, '')
                            .split("/");
         var page = router.getCurrentPage(hash);
-        endpoint[page].apply(null, router.getArguments(hash));
+        var args = router.getArguments(hash);
+        location.hash = page + "/" + args.join("/") + "&database=" + getDatabase();
     });
 
     // Start page

@@ -26,7 +26,7 @@ var router = (function(session) {
         },
 
         getCurrentPage: function(hash) {
-            return hash.splice(0, 1).pop();
+            return router.getPageOnly(hash.splice(0, 1));
         },
 
         getArguments: function(hash) {
@@ -38,10 +38,16 @@ var router = (function(session) {
                        .split(","); // ["TABLE_1", "TABLE_2"]
             return hash;
         },
+
+        getPageOnly: function(page) {
+            return  page.join() // "TABLE_1,TABLE_2&database=DB"
+                        .split("&") // ["TABLE_1,TABLE_2", "&database=DB"]
+                        .splice(0, 1) // ["TABLE_1,TABLE_2"]
+                        .pop(); //"TABLE_1,TABLE_2"
+        },
         
         render: function(hash) {
-            var page = hash.splice(0, 1)
-                           .pop();
+            var page = router.getPageOnly(hash.splice(0, 1));
             var database = getParam("database", hash);
 
             if (!session.isLogged() && (delisted.concat(["reset-password"]))
