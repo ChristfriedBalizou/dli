@@ -30,13 +30,19 @@ var router = (function(session) {
         },
 
         getArguments: function(hash) {
-            hash.splice(0, 1).pop();
+            // for ["TABLE_1", "TABLE_2&database=DB"]
+            hash = hash.join() // "TABLE_1,TABLE_2&database=DB"
+                       .split("&") // ["TABLE_1,TABLE_2", "&database=DB"]
+                       .splice(0, 1) // ["TABLE_1,TABLE_2"]
+                       .pop() //"TABLE_1,TABLE_2"
+                       .split(","); // ["TABLE_1", "TABLE_2"]
             return hash;
         },
         
         render: function(hash) {
             var page = hash.splice(0, 1)
                            .pop();
+            var database = getParam("database", hash);
 
             if (!session.isLogged() && (delisted.concat(["reset-password"]))
                                         .indexOf(page) === -1) {
@@ -54,12 +60,16 @@ var router = (function(session) {
                 return;
             }
 
+            if(database) {
+                setDatabase(database);
+            }
+
             $("[data-page]")
                 .hide()
                 .filter("[data-page="+ page +"]")
                 .show();
 
-            path[page].apply(null, hash);
+            path[page].apply(null, router.getArguments(hash));
         },
 
         listen: function() {
