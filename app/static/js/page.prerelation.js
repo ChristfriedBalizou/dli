@@ -51,7 +51,7 @@ var page = (function(page){
 							React.createElement(
 								"a", 
 								{className:"mdl-chip__text no-decoration",
-                                 href:"/#table/" + value},
+                                 href:"/#table/" + value + "&database=" + getDatabase()},
 								value),
 							React.createElement(
 								"button",

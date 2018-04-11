@@ -217,7 +217,7 @@ class MetaElement extends React.Component {
                                 {className: "mdl-chip__text no-decoration mdl-color-text--blue",
                                     href:("/#" + [this.state.endpoint,
                                         obj.description,
-                                        this.state.table].join("/"))},
+                                        this.state.table].join("/") + "&database=" + getDatabase())},
                                 obj.description
                             ),
                             (this.state.editable ? 

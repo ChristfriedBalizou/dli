@@ -53,6 +53,8 @@ var page = (function(page){
                     var $tables = [];
                     var $columns = [];
 
+                    $list.empty();
+
                     renderer(
                         data.response.data.relations,
                         $relations,
@@ -117,6 +119,7 @@ var page = (function(page){
 
         obj["tag"] = tag;
         obj["url"] = location.origin;
+        obj["dbargs"] = "&database=" + getDatabase();
 
         return Mustache.render(tmplValue, obj); 
     }

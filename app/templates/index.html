@@ -52,12 +52,12 @@ ose a utility bill
 <script id="tmpl-value" type="x-tmpl-mustche">
     <li class=""> 
         <div>  
-            <a href="/#<% tag %>/<% value %>" class="no-decoration label"> 
+            <a href="/#<% tag %>/<% value %><% dbargs %>" class="no-decoration label"> 
                  <% value %>
             </a> 
         </div>
         <div>
-        <a href="/#<% tag %>/<% value %>" class="no-decoration link"> 
+        <a href="/#<% tag %>/<% value %><% dbargs %>" class="no-decoration link"> 
              <% url %>/#<% tag %>/<% value %> 
         </a> 
         </div>
@@ -80,7 +80,7 @@ ose a utility bill
 
 <script id="tmpl-fams" type="x-tmpl-mustache">
     <div class="mdl-cell mdl-cell--6-col">
-        <a href="<% url %>" class="no-decoration">
+        <a href="<% url %><% dbargs %>" class="no-decoration">
             <div class="mdl-card auto-height mdl-shadow--2dp no-margin">
                 <span class="user-detail">
                     <% user %><br/>

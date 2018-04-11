@@ -193,7 +193,7 @@ var relations = (function(){
             if(a === b) {
                 return React.createElement(
                     'a',
-                    {className: "no-decoration", href: "/#column/" + a},
+                    {className: "no-decoration", href: "/#column/" + a + "&database=" + getDatabase()},
                     a
                 );
             }
@@ -202,13 +202,13 @@ var relations = (function(){
                 React.createElement('div', null,
                     React.createElement(
                         'a',
-                        {className: "no-decoration", href: "/#column/" + a},
+                        {className: "no-decoration", href: "/#column/" + a + "&database=" + getDatabase()},
                         a
                     ),
                     " - ",
                     React.createElement(
                         'a',
-                        {className: "no-decoration", href: "/#column/" + b},
+                        {className: "no-decoration", href: "/#column/" + b + "&database=" + getDatabase()},
                         b
                     )
                 )

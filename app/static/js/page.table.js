@@ -44,7 +44,7 @@ var page = (function(page){
                                  "<span class=\"mdl-list__item-primary-content\">" +
                                      "<span class=\"mdl-chip\">" +
                                          "<a class=\"mdl-chip__text no-decoration\"" +
-                                             "href=\"/#column/"+ value +"\">" +
+                                             "href=\"/#column/"+ value +"&database="+ getDatabase() +"\">" +
                                              value +
                                          "</a>" +
                                      "</span>" +

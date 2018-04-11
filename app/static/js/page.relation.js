@@ -153,8 +153,8 @@ var page = (function(page){
                     '<span class="mdl-chip__contact mdl-color--indigo mdl-color-text--white">'+ 
                         '<i class="material-icons">grid_on</i>' +
                     '</span>' +
-                    '<a href="/#table/'+ value +'" class="mdl-chip__text no-decoration">'+ value + '</a>' +
-                    '<a href="/#table/'+ value +'" class="mdl-chip__action">' +
+                    '<a href="/#table/'+ value + "&database=" + getDatabase() +'" class="mdl-chip__text no-decoration">'+ value + '</a>' +
+                    '<a href="/#table/'+ value  + "&database=" + getDatabase()+'" class="mdl-chip__action">' +
                         '<i class="material-icons">open_in_browser</i>' +
                     '</a>' +
                 '</span>');

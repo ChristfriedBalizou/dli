@@ -21,7 +21,7 @@ var page = (function(page){
         init: function() {
             $form.on('submit', function(e){
                 e.preventDefault();
-                location.hash = "search/" + $input.val().split(" ").join("/");
+                location.hash = "search/" + $input.val().split(" ").join("/") + "&database=" + getDatabase();
             });
         },
 
@@ -47,6 +47,7 @@ var page = (function(page){
 
 
     function render(obj) {
+        obj["dbargs"] = "&database=" + getDatabase(); 
         return Mustache.render(tmplValue, obj);
     }
 
