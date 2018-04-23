@@ -124,7 +124,7 @@ def merge_with_database(relations):
                    "right": r.columnr.name,
                    "is_deleted": r.is_deleted,
                    "user": r.user.json() if r.user != None else default_user(),
-                   "record_date": r.record_date.strftime("%Y-%M-%d %H:%M:%S"),
+                   "record_date": r.record_date.strftime("%Y-%m-%d %H:%M:%S"),
                    "relation_type": "human"}
                   for r in rels]
 
