@@ -2,26 +2,17 @@
   All database model
 '''
 
-import sqlalchemy
-from sqlalchemy import (Column,
-                        ForeignKey,
-                        Integer,
-                        String,
-                        Boolean,
-                        DateTime,
-                        types,
-                        func)
+from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, DateTime, types, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy import create_engine
 
-from sqlalchemy_continuum import make_versioned
+from history_meta import Versioned, versioned_session
 
 from passlib.hash import pbkdf2_sha256
 
 import os
 
-make_versioned(user_cls=None)
 
 FILE_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
 DATABASE_DIRECTORY = os.path.join(FILE_DIRECTORY, '..', 'db')
@@ -37,6 +28,7 @@ if os.path.exists(DATABASE_DIRECTORY) is False:
 
 def DBsession():
     Session = sessionmaker(bind=ENGINE)
+    versioned_session(Session)
     return Session()
 
 
@@ -61,9 +53,8 @@ class ChoiceType(types.TypeDecorator):
         return self.choices[value]
 
 
-class User(BASE):
+class User(Versioned, BASE):
 
-    __versioned__ = {}
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
@@ -90,9 +81,8 @@ class User(BASE):
                 "username": self.username}
 
 
-class TableModel(BASE):
+class TableModel(Versioned, BASE):
 
-    __versioned__ = {}
     __tablename__ = 'tablemodel'
 
     id = Column(Integer, primary_key=True)
@@ -103,9 +93,8 @@ class TableModel(BASE):
         assert type(other) is TableModel and other.id == self.id
 
 
-class ColumnModel(BASE):
+class ColumnModel(Versioned, BASE):
 
-    __versioned__ = {}
     __tablename__ = 'columnmodel'
 
     id = Column(Integer, primary_key=True)
@@ -116,9 +105,8 @@ class ColumnModel(BASE):
         assert type(other) is ColumnModel and other.id == self.id
 
 
-class Meta(BASE):
+class Meta(Versioned, BASE):
 
-    __versioned__ = {}
     __tablename__ = 'meta'
 
     TYPES = [
@@ -164,9 +152,8 @@ class Meta(BASE):
                 }
 
 
-class RelationModel(BASE):
+class RelationModel(Versioned, BASE):
 
-    __versioned__ = {}
     __tablename__ = 'relationmodel'
 
     id = Column(Integer, primary_key=True)
@@ -190,6 +177,5 @@ class RelationModel(BASE):
     def __eq__(self, other):
         assert type(other) is RelationModel and other.id == self.id
 
-sqlalchemy.orm.configure_mappers()
 # Create sqllite file
 BASE.metadata.create_all(bind=ENGINE)
