@@ -1,0 +1,3 @@
+[GRAPHVIZ]
+path = /usr/bin
+layout = dot

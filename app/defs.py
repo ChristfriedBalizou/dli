@@ -15,7 +15,7 @@ from full_text_search import query_search
 try:
     import pygraphviz as graph
 except ImportError:
-    pass
+    import tools.pygraphviz as graph
 
 from auth.auth import Auth
 from sqlalchemy import or_
