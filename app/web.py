@@ -132,17 +132,17 @@ def run_request(obj):
         return response, message
 
     # If it's tables request ask to pre-draw graph
-    with NamedTemporaryFile(mode='w+b',
-                            dir=DIRECTORY,
-                            prefix="libDWeb",
-                            suffix=".req",
-                            delete=False) as writer:
-        doc_req = copy.deepcopy(obj)
-        doc_req["action"] = "draw_dot"
+    filename = 'libDWeb%s.png' % str(uuid.uuid4().hex)
+    req = copy.deepcopy(obj)
+    req["action"] = "draw_dot"
+    req.update(response)
 
-        doc_req.update(response)
-        json.dump(doc_req, writer)
-        response["filename"] = extension(os.path.basename(writer.name), "png")
+    func[req.get('action')](APP.config.get("DATABASE_DIR"),
+                            req,
+                            filename,
+                            APP.config.get('IMAGE_DIR'))
+
+    response["filename"] = filename
 
     return response, message
 
@@ -488,6 +488,7 @@ def run(options):
     APP.config["email_server"] = options.email_server
     APP.secret_key = 'd35feb998e3647a4a665284078bd5c38'
     APP.config['SESSION_TYPE'] = 'filesystem'
+    APP.config['IMAGE_DIR'] = os.path.expanduser(options.image_dir)
 
     sess = Session()
     sess.init_app(APP)
@@ -515,6 +516,11 @@ if __name__ == '__main__':
     parser.add_argument("-d", "--database",
                         required=True,
                         help="Database directory to introspec")
+
+    parser.add_argument("--image-dir",
+                        required=True,
+                        dest='image_dir',
+                        help="Image storage directory")
 
     if os.path.exists(DIRECTORY) is False:
         os.mkdir(DIRECTORY)
