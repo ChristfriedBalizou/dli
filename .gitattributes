@@ -1,1 +1,3 @@
-app/static/js/* linguist-vendored=false
+app/static/js/** linguist-vendored=false
+app/static/js/** linguist-documentation=false
+app/static/js/** linguist-generated=false
